@@ -1,4 +1,4 @@
-import { useNavigation } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { authService } from '~/services/auth/authService';
@@ -6,6 +6,7 @@ import ErrorService from '~/services/error/ErrorService';
 
 const RegisterScreen = () => {
   const navigation = useNavigation();
+  const router = useRouter()
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,7 +24,7 @@ const RegisterScreen = () => {
     try {
       await authService.register(name, email, password, isCompany ? ice : String(ice));
       Alert.alert('Succès', 'Inscription réussie !');
-      navigation.navigate('(auth)/login');
+      router.push('/(auth)/login');
     } catch (error) {
       ErrorService.handleError(error);
       throw error;
@@ -59,7 +60,6 @@ const RegisterScreen = () => {
         onChangeText={setPassword}
       />
 
-      {/* Bouton pour sélectionner Client ou Entreprise */}
       <TouchableOpacity
         className={`w-full p-3 rounded ${isCompany ? 'bg-blue-500' : 'bg-gray-300'}`}
         onPress={() => setIsCompany(!isCompany)}
@@ -69,7 +69,6 @@ const RegisterScreen = () => {
         </Text>
       </TouchableOpacity>
 
-      {/* Champ ICE (Visible uniquement pour une entreprise) */}
       {isCompany && (
         <TextInput
           className="w-full p-3 border border-gray-300 rounded mt-3"
@@ -87,7 +86,7 @@ const RegisterScreen = () => {
         <Text className="text-white text-center font-bold">{loading ? 'Inscription...' : 'S’inscrire'}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('(auth)/login')} className="mt-3">
+      <TouchableOpacity onPress={() => router.push('/(auth)/login')} className="mt-3">
         <Text className="text-blue-500">Déjà un compte ? Se connecter</Text>
       </TouchableOpacity>
     </View>

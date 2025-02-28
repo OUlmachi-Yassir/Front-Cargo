@@ -1,15 +1,15 @@
 import { View, Text, TouchableOpacity } from 'react-native'
 import React from 'react'
-import { useNavigation } from 'expo-router'
+import { useRouter } from 'expo-router'
 
 export default function index() {
-  const  navigation = useNavigation()
+  const  router = useRouter()
   return (
-    <View className='text-3xl bg-red-900'>
+    <View className='text-3xl bg-red-900 flex flex-colomn items-center '>
       <Text>index E</Text>
-      <TouchableOpacity onPress={() => navigation.navigate('(auth)/login')} className="mt-3">
+      <TouchableOpacity onPress={() => router.push('/(auth)/login')} className="mt-3">
               <Text className="text-blue-500">Déjà un compte ? Se connecter</Text>
-            </TouchableOpacity>
+      </TouchableOpacity>
     </View>
   )
 }
