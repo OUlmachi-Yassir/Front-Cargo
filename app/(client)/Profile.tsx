@@ -3,12 +3,14 @@ import { View, Text, TextInput, ActivityIndicator, Button, Alert } from 'react-n
 import { getUserProfile, updateUserProfile, deleteUserProfile } from '~/services/user/profileService';
 import { authService } from '~/services/auth/authService';
 import { useRouter } from 'expo-router';
+import * as Location from 'expo-location';
 
 const ProfileScreen = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [updatedUser, setUpdatedUser] = useState<any>({});
+  const [location, setLocation] = useState<{ latitude: number; longitude: number; city?: string |null; country?: string|null } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -17,15 +19,43 @@ const ProfileScreen = () => {
       if (profileData) {
         setUser(profileData);
         setUpdatedUser(profileData);
+        
+        if (profileData.location) {
+          setLocation(profileData.location);
+        } else {
+          await fetchLocation(); 
+        }
       }
       setLoading(false);
     };
+
     fetchProfile();
   }, []);
 
+  const fetchLocation = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      console.log('Permission to access location was denied');
+      return;
+    }
+
+    const loc = await Location.getCurrentPositionAsync({});
+    const { latitude, longitude } = loc.coords;
+
+    const address = await Location.reverseGeocodeAsync({ latitude, longitude });
+
+    if (address.length > 0) {
+      const { city, country } = address[0];
+      setLocation({ latitude, longitude, city, country });
+    } else {
+      setLocation({ latitude, longitude });
+    }
+  };
+
   const handleUpdate = async () => {
     setLoading(true);
-    const result = await updateUserProfile(updatedUser);
+    const dataToUpdate = { ...updatedUser, location };
+    const result = await updateUserProfile(dataToUpdate);
     if (result) {
       setUser(result);
       setEditing(false);
@@ -49,10 +79,11 @@ const ProfileScreen = () => {
       },
     ]);
   };
-  const handeleLogout= async ()=>{
+
+  const handleLogout = async () => {
     await authService.logout();
     router.push('/(auth)/login');
-  }
+  };
 
   if (loading) {
     return <ActivityIndicator size="large" color="blue" />;
@@ -65,26 +96,19 @@ const ProfileScreen = () => {
           <Text className="text-2xl font-bold text-center mb-4">Profile</Text>
           {editing ? (
             <>
-              <TextInput
-                className="border p-2 rounded-md mb-2"
-                placeholder="Name"
-                value={updatedUser.name}
-                onChangeText={(text) => setUpdatedUser({ ...updatedUser, name: text })}
-              />
-              <TextInput
-                className="border p-2 rounded-md mb-2"
-                placeholder="Email"
-                value={updatedUser.email}
-                editable={false} 
-              />
+              <TextInput className="border p-2 rounded-md mb-2" placeholder="Name" value={updatedUser.name} onChangeText={(text) => setUpdatedUser({ ...updatedUser, name: text })} />
+              <TextInput className="border p-2 rounded-md mb-2" placeholder="Email" value={updatedUser.email} editable={false} />
+              
               {user.role === 'company' && (
-                <TextInput
-                  className="border p-2 rounded-md mb-2"
-                  placeholder="ICE"
-                  value={updatedUser.ice || ''}
-                  onChangeText={(text) => setUpdatedUser({ ...updatedUser, ice: text })}
-                />
+                <TextInput className="border p-2 rounded-md mb-2" placeholder="ICE" value={updatedUser.ice || ''} onChangeText={(text) => setUpdatedUser({ ...updatedUser, ice: text })} />
               )}
+
+              {location && (
+                <Text className="border p-2 rounded-md mb-2">
+                  Location: {location.city}, {location.country} (Lat: {location.latitude}, Long: {location.longitude})
+                </Text>
+              )}
+
               <Button title="Save Changes" onPress={handleUpdate} />
               <Button title="Cancel" onPress={() => setEditing(false)} color="gray" />
             </>
@@ -93,13 +117,20 @@ const ProfileScreen = () => {
               <Text className="text-lg mb-2"><Text className="font-bold">Name:</Text> {user.name}</Text>
               <Text className="text-lg mb-2"><Text className="font-bold">Email:</Text> {user.email}</Text>
               <Text className="text-lg mb-2"><Text className="font-bold">Role:</Text> {user.role}</Text>
+
               {user.role === 'company' && user.ice && (
                 <Text className="text-lg mb-2"><Text className="font-bold">ICE:</Text> {user.ice}</Text>
               )}
 
+              {location && (
+                <Text className="text-lg mb-2">
+                  <Text className="font-bold">Location:</Text> {location.city}, {location.country} (Lat: {location.latitude}, Long: {location.longitude})
+                </Text>
+              )}
+
               <Button title="Edit Profile" onPress={() => setEditing(true)} />
               <Button title="Delete Account" onPress={handleDelete} color="red" />
-              <Button title="Log-Out " onPress={handeleLogout} color="red" />
+              <Button title="Log-Out" onPress={handleLogout} color="red" />
             </>
           )}
         </View>
