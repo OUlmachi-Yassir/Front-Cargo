@@ -15,7 +15,7 @@ export default function Profile() {
 
   return (
       <View style={styles.container}>
-        <Text style={styles.text}>Profile Page</Text>
+        <Text style={styles.text} className=' bg-red-500 '>Profile Page</Text>
         {user ? (
           <>
             <Text style={styles.info}>Name: {user.name}</Text>
