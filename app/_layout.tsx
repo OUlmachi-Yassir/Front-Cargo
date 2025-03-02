@@ -35,7 +35,7 @@ export default function RootLayout() {//efv
         <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/signup" options={{ headerShown: false }} />        
         <Stack.Screen name="(client)" options={{ headerShown: false }} />
-        
+        <Stack.Screen name="(cars)" options={{ headerShown: false }} />
         <Stack.Screen name="(campany)" options={{ headerShown: false }} />
 
       </Stack>
