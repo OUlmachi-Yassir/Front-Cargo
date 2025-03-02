@@ -90,9 +90,9 @@ const ProfileScreen = () => {
   }
 
   return (
-    <View className="flex-1 justify-center items-center bg-gray-100 p-6">
+    <View className="flex-1 justify-center items-center bg-gradient-to-t from-[#22c1c3] to-[#fdbb2d] min-h-screen p-6">
       {user ? (
-        <View className="bg-white p-6 rounded-xl shadow-md w-full max-w-md">
+        <View className="bg-red-300 p-6 rounded-xl shadow-md w-full ">
           <Text className="text-2xl font-bold text-center mb-4">Profile</Text>
           {editing ? (
             <>
