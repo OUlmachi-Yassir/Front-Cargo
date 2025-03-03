@@ -3,6 +3,7 @@ import { View, Text, Image, ScrollView, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";  
 import { fetchCarDetails } from "~/services/cars/carService"; 
 import { Car } from "~/types/types";
+import { replaceIp } from '../../helpers/helpers';
 
 const CarDetails = () => {
   const [car, setCar] = useState<Car | null>(null);
@@ -41,7 +42,7 @@ const CarDetails = () => {
         {car?.images?.flat().map((imageUrl, index) => (
           <Image
             key={index}
-            source={{ uri: imageUrl }}
+            source={{ uri: replaceIp(imageUrl,'192.168.8.81') }}
             style={{ width: 300, height: 200, borderRadius: 10, marginRight: 10 }}
             resizeMode="cover"
           />

@@ -4,6 +4,7 @@ import Swiper from "react-native-swiper";
 import { getAllCars } from "~/services/cars/carService";
 import { Car } from "~/types/types";
 import { useRouter } from "expo-router"; 
+import { replaceIp } from "~/helpers/helpers";
 
 const { width } = Dimensions.get("window");
 
@@ -54,7 +55,7 @@ const ClientHome = () => {
                 {car.images.flat().map((imageUrl, index) => (
                   <Image
                     key={index}
-                    source={{ uri: imageUrl }}
+                    source={{ uri: replaceIp(imageUrl,'192.168.8.81') }}
                     style={{ width: width - 32, height: 200, borderRadius: 10 }}
                     resizeMode="cover"
                   />
