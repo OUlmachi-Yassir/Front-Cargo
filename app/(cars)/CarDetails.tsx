@@ -3,7 +3,7 @@ import { View, Text, Image, ScrollView, ActivityIndicator, Modal, TouchableOpaci
 import { useLocalSearchParams } from "expo-router";  
 import { fetchCarDetails } from "~/services/cars/carService"; 
 import { Car } from "~/types/types";
-import { replaceIp } from '../../helpers/helpers';
+import { replaceIp } from '../../services/helpers/helpers';
 import { createReservation, getReservationsForCar } from "~/services/cars/reservationService";
 import { Button } from "~/components/Button";
 import CalendarPicker from 'react-native-calendar-picker';
@@ -91,7 +91,7 @@ const CarDetails = () => {
         {car?.images?.flat().map((imageUrl, index) => (
           <Image
             key={index}
-            source={{ uri: replaceIp(imageUrl, '192.168.8.81') }}
+            source={{ uri: replaceIp(imageUrl, process.env.EXPO_PUBLIC_URL) }}
             style={{ width: 300, height: 200, borderRadius: 10, marginRight: 10 }}
             resizeMode="cover"
           />
