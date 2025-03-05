@@ -1,5 +1,6 @@
 import { authService } from '../auth/authService';
 import { jwtDecode } from 'jwt-decode';
+import * as FileSystem from 'expo-file-system';
 
 const API_URL = process.env.EXPO_PUBLIC_APP_API_URL;
 
@@ -54,24 +55,32 @@ export const updateUserProfile = async (userData: any) => {
   }
 };
 
-export const updateUserImage = async (userData: any) => {
+export const updateUserImage = async (file: Blob) => {
   try {
     const token = await authService.getToken();
     if (!token) throw new Error('No token found');
 
     const decodedToken: any = jwtDecode(token);
     const userId = decodedToken.id;
+console.log("from service",file);
+    const formData = new FormData();
+    
+    formData.append('image', file);
 
     const response = await fetch(`${API_URL}/users/${userId}/image`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'multipart/form-data',
       },
-      body: JSON.stringify(userData),
+      body: formData,
     });
+    console.log(response);
 
-    if (!response.ok) throw new Error('Failed to update profile');
+    if (!response.ok) {
+      console.log('Failed to update image:', response.status, await response.text());
+      throw new Error('Failed to update profile image');
+    }
 
     return await response.json();
   } catch (error) {
@@ -79,6 +88,24 @@ export const updateUserImage = async (userData: any) => {
     return null;
   }
 };
+
+export const updateUserImage2 =  async (fileUri : string) => {
+  const token = await authService.getToken();
+  if (!token) throw new Error('No token found');
+
+  const decodedToken: any = jwtDecode(token);
+  const userId = decodedToken.id;
+  const response = await FileSystem.uploadAsync(`${API_URL}/users/${userId}/image`, fileUri, {
+    fieldName: 'image',
+    httpMethod: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+  });
+  return JSON.stringify(response, null, 4);
+}
+
 export const deleteUserProfile = async () => {
   try {
     const token = await authService.getToken();
