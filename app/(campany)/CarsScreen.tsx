@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Image, ScrollView, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient'; 
 import { createCar } from '~/services/cars/carService';
 import { authService } from '~/services/auth/authService';
+import tw from 'twrnc';
 
 const AddCarScreen = () => {
   const [marque, setMarque] = useState('');
@@ -20,7 +21,7 @@ const AddCarScreen = () => {
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      setImages([...images, result.assets[0].uri]); 
+      setImages([...images, result.assets[0].uri]);
     }
   };
 
@@ -28,7 +29,7 @@ const AddCarScreen = () => {
     try {
       const token = await authService.getToken();
       if (!token) throw new Error('Token non disponible');
-      
+
       const carData = { marque, modele, statut };
       await createCar(token, carData, images);
 
@@ -44,20 +45,52 @@ const AddCarScreen = () => {
   };
 
   return (
-    <View style={{ padding: 20 }}>
-      <Text style={{ fontSize: 22, fontWeight: 'bold' }}>Ajouter une Voiture</Text>
-      <TextInput placeholder="Marque" value={marque} onChangeText={setMarque} style={{ borderWidth: 1, marginVertical: 5 }} />
-      <TextInput placeholder="Modèle" value={modele} onChangeText={setModele} style={{ borderWidth: 1, marginVertical: 5 }} />
-      <Button title="Choisir une image" onPress={pickImage} />
+    <LinearGradient
+      colors={['#fad7a0', '#f2f3f4']} 
+      style={tw`flex-1  justify-center`}
+    >
+      <View style={tw`bg-white p-5 rounded-t-10 shadow-lg h-[90%] relative top-12`}>
+        <Text style={tw`text-2xl font-bold text-center mb-5`}>Ajouter une Voiture</Text>
 
-      <ScrollView horizontal>
-        {/* {images.map((uri, index) => (
-          <Image key={index} source={{ uri }} style={{ width: 100, height: 100, margin: 5 }} />
-        ))} */}
-      </ScrollView>
+        <TextInput
+          placeholder="Marque"
+          value={marque}
+          onChangeText={setMarque}
+          style={tw`border border-gray-300 rounded-lg p-3 mb-4`}
+        />
 
-      <Button title="Ajouter la voiture" onPress={handleCreateCar} />
-    </View>
+        <TextInput
+          placeholder="Modèle"
+          value={modele}
+          onChangeText={setModele}
+          style={tw`border border-gray-300 rounded-lg p-3 mb-4`}
+        />
+
+        <Button
+          title="Choisir une image"
+          onPress={pickImage}
+          color="#FFA500" 
+        />
+
+        <ScrollView horizontal style={tw`mt-4`}>
+          {images.map((uri, index) => (
+            <Image
+              key={index}
+              source={{ uri }}
+              style={tw`w-24 h-24 rounded-lg mr-2`}
+            />
+          ))}
+        </ScrollView>
+
+        <View style={tw`mt-6`}>
+          <Button
+            title="Ajouter la voiture"
+            onPress={handleCreateCar}
+            color="#4CAF50" 
+          />
+        </View>
+      </View>
+    </LinearGradient>
   );
 };
 
