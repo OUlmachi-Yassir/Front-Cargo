@@ -3,9 +3,16 @@ type RootStackParamList = {
     signup: undefined;
     "(tabs)": undefined;
     "(auth": undefined;
+    Chat: { companyId: string };
   };
   export default RootStackParamList;
 
+  export interface RegisterData {
+    name: string;
+    email: string;
+    password: string;
+    ice?: string;  // `ice` est optionnel car il ne sera présent que si `isCompany` est `true`
+  }
 
   export interface Car {
     _id: string;

@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 import ErrorService from '../error/ErrorService';
 import { jwtDecode } from 'jwt-decode';
+import { RegisterData } from '~/types/types';
 
 
 export const authService = {
@@ -33,23 +34,24 @@ export const authService = {
     }
   },
 
-  register: async (name: string, email: string, password: string, ice:string) => {
+  register: async (data: RegisterData) => {
+    console.log(data)
     try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_APP_API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password,ice }),
+        body: JSON.stringify(data),
       });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Erreur lors de l’inscription');
-
-      return data;
-    } catch (error:unknown) {
-        ErrorService.handleError(error);
-        throw error;
+  
+      const responseData = await response.json();
+      if (!response.ok) throw new Error(responseData.message || 'Erreur lors de l’inscription');
+  
+      return responseData;
+    } catch (error) {
+      ErrorService.handleError(error);
+      throw error;
     }
-  },
+  },  
 
   getToken: async () => {
     return await AsyncStorage.getItem('token');

@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
-  Text,
   TextInput,
   ActivityIndicator,
   Button,
@@ -21,6 +20,7 @@ import tw from 'twrnc';
 import Svg, { Path } from 'react-native-svg';
 import MapComponent from '~/components/map/MapComponent';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Text } from 'react-native';
 
 const ComponyProfile = () => {
   const [user, setUser] = useState<any>(null);
@@ -57,16 +57,17 @@ const ComponyProfile = () => {
       return;
     }
 
-    const loc = await Location.getCurrentPositionAsync({});
-    const { latitude, longitude } = loc.coords;
-    const address = await Location.reverseGeocodeAsync({ latitude, longitude });
-
-    if (address.length > 0) {
-      const { city, country } = address[0];
-      setLocation({ latitude, longitude, city, country });
-    } else {
-      setLocation({ latitude, longitude });
-    }
+    const loc =  Location.getCurrentPositionAsync({}).then(({coords : { latitude, longitude }})=> {
+      Location.reverseGeocodeAsync({ latitude, longitude }).then((address) => {
+        if (address.length > 0) {
+          const { city, country } = address[0];
+          setLocation({ latitude, longitude, city, country });
+        } else {
+          setLocation({ latitude, longitude });
+        }
+      })
+    });
+   
   };
 
   const handleUpdate = async () => {
@@ -335,16 +336,27 @@ const ComponyProfile = () => {
               </>
             ) : (
               <>
-              <View className='flex flex-col justify-center items-center bg-[#f2f3f4] '>
-                <Text style={tw`text-lg mb-2 mx-4 rounded-full px-5 w-64 pb-1 shadow-xl`}><Text style={tw`font-bold `}>EMAIL:</Text>{user.email}</Text>
-                  {user.role === 'company' && user.ice && (
-                    <Text style={tw`text-lg mb-2 mx-4 bg-[#f2f3f4] rounded-full px-5 w-64 pb-1 shadow-xl`}>
-                      <Text style={tw`font-bold `}>ICE:</Text> {user.ice}
+              <View className='flex flex-col px-5 '>
+              <View style={tw``}>
+                    <Text style={tw`relative top-2  px-1 z-5 bg-white`}>EMAIL:</Text>
+                    <Text style={tw`text-lg mb-5  font-bold rounded-tr-full w-[100%] px-5 py-3 border-2`}>
+                      {user.email}
                     </Text>
-                  )}
-                  <Text style={tw`text-lg mb-2 mx-4 bg-[#f2f3f4] rounded-full px-5 w-64 pb-1 shadow-xl`}><Text style={tw`font-bold `}>Profession:</Text>{user.role}</Text>
+                  </View>                  
+                  {user.role === 'company' && user.ice && (
+                      <View style={tw``}>
+                        <Text style={tw`relative top-2 px-1 z-5 bg-white`}>ICE:</Text>
+                        <Text style={tw`text-lg mb-5 font-bold rounded-tr-full w-[100%] px-5 py-3 border-2`}>
+                          {user.ice}
+                        </Text>
+                      </View>
+                    )}
+                  <View style={tw` `}><Text style={tw`relative top-2 px-1 z-5 bg-white`}>Profession:</Text><Text style={tw`text-lg mb-5 font-bold rounded-tr-full w-[100%] px-5  py-3 border-2`}>{user.role}</Text></View>
                 {location && (
-                  <View style={tw`text-lg mb-2 flex flex-row w-full`}>
+                  <View>
+                    <Text  style={tw`relative top-2 px-1 z-5 bg-white`}>Location</Text>
+                  <View style={tw`text-lg mb-5 font-bold rounded-tr-full w-[100%] px-5  py-3 border-2 flex flex-row `}>
+                    
                     <Svg width={30} height={30} viewBox="0 0 24 24" fill="black">
                       <Path
                         d="M12 2C8.13 2 5 5.13 5 9c0 4.68 6 11 6 11s6-6.32 6-11c0-3.87-3.13-7-7-7zM12 11.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5 14.5 7.62 14.5 9 13.38 11.5 12 11.5z"
@@ -353,6 +365,7 @@ const ComponyProfile = () => {
                     <Text style={tw`text-xl`}>
                       {location.city}, {location.country} 
                     </Text>
+                  </View>
                   </View>
                 )}
                   </View>

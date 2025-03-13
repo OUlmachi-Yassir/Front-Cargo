@@ -5,14 +5,14 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import * as Notifications from 'expo-notifications';
 
 import { useColorScheme } from '~/hooks/useColorScheme.web';
 import "../global.css"
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {//efv
+export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -23,6 +23,19 @@ export default function RootLayout() {//efv
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  
+
+  useEffect(() => {
+    const requestPermissions = async () => {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== 'granted') {
+        alert('You need to enable notifications to receive messages.');
+      }
+    };
+
+    requestPermissions();
+  }, []);
 
   if (!loaded) {
     return null;
@@ -37,6 +50,7 @@ export default function RootLayout() {//efv
         <Stack.Screen name="(client)" options={{ headerShown: false }} />
         <Stack.Screen name="(cars)" options={{ headerShown: false }} />
         <Stack.Screen name="(campany)" options={{ headerShown: false }} />
+        <Stack.Screen name="Chat/CampanyChat" options={{ headerShown: false }} />
 
       </Stack>
       <StatusBar style="auto" />
