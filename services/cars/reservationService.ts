@@ -1,54 +1,86 @@
+import { useState } from "react";
+import { Alert } from "react-native";
+import { authService } from "~/services/auth/authService";
 import { jwtDecode } from "jwt-decode";
-import { authService } from "../auth/authService";
-import ErrorService from "../error/ErrorService";
 
+export const useReservation = () => {
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [loading, setLoading] = useState(false);
 
-export const createReservation = async (carId: string, userId: string, startDate: string, endDate: string) => {
-     const token = await authService.getToken();
-        if (!token) throw new Error('No token found');
-    
-        const decodedToken: any = jwtDecode(token);
-  try {
-    const response = await fetch(`${process.env.EXPO_PUBLIC_APP_API_URL}/reservations`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ carId, userId, startDate, endDate }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Erreur lors de la réservation');
+  const handleReservation = async (carId: string) => {
+    if (!startDate || !endDate) {
+      Alert.alert("Erreur", "Veuillez sélectionner une date de début et de fin.");
+      return;
     }
 
-    return await response.json();
-  } catch (error:unknown) {
-    ErrorService.handleError(error);
-    throw error;
-  }
+    try {
+      setLoading(true);
+      const token = await authService.getToken();
+      if (!token) throw new Error("No token found");
+      const decodedToken: any = jwtDecode(token);
+      const userId = decodedToken.id;
+
+      const response = await fetch(`${process.env.EXPO_PUBLIC_APP_API_URL}/cars/${carId}/reservations`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+        }),
+      });
+      console.log("im here for chiking response: ",response)
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la réservation");
+      }
+
+      Alert.alert("Succès", "Votre réservation a été envoyée avec succès.");
+    } catch (error) {
+      console.error("Erreur lors de la réservation :", error);
+      Alert.alert("Erreur", "Une erreur s'est produite lors de la réservation.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    loading,
+    handleReservation,
+  };
 };
 
-export const getReservationsForCar = async (carId: string) => {
-    const token = await authService.getToken();
-        if (!token) throw new Error('No token found');
+
+export const fetchUserReservations = async () => {
   try {
-    const response = await fetch(`${process.env.EXPO_PUBLIC_APP_API_URL}/cars/${carId}`, {
-      method: 'GET',
+    const token = await authService.getToken();
+    if (!token) throw new Error("No token found");
+    const decodedToken: any = jwtDecode(token);
+    const userId = decodedToken.id;
+
+    const response = await fetch(`${process.env.EXPO_PUBLIC_APP_API_URL}/cars/reservations/my`, {
+      method: "GET",
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Erreur lors de la récupération des réservations');
-    }
+    // Affiche les détails de la réponse pour comprendre l'erreur
+    const responseBody = await response.json();
+    if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}, ${responseBody.message || "Aucune réponse détaillée"}`);
 
-    return await response.json();
-  } catch (error:unknown) {
-    ErrorService.handleError(error);
-    throw error;
+    return responseBody;
+  } catch (error) {
+    console.error("Erreur lors de la récupération des réservations :", error);
+    Alert.alert("Erreur", error.message || "Une erreur inconnue est survenue");
+    return [];  // Retourne un tableau vide en cas d'erreur
   }
 };

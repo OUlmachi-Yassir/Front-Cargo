@@ -13,6 +13,9 @@ web-build/
 expo-env.d.ts
 
 
+.env
+updateIP.js
+
 
 ios
 android
@@ -25,6 +28,3 @@ android
 
 
 
-.env
-
-.updateIP

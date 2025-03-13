@@ -17,7 +17,7 @@ export default function ConversationsList() {
     setIsRefreshing(true);
     try {
       const userConversations = await getUserConversations();
-      console.log(userConversations)
+      console.log(userConversations);
       const allUsers = await getAllUsers();
       const token = await authService.getToken();
       
@@ -39,10 +39,7 @@ export default function ConversationsList() {
         const mappedData = userConversations.conversations.map((conv) => {
           const otherUserId = conv.senderId === loggedUserId ? conv.receiverId : conv.senderId;
           const otherUser = allUsers.find((user) => user._id === otherUserId);
-        
-          console.log("Conversation:", conv);
-          console.log("Looking for user with ID:", otherUserId);
-          console.log("Found user:", otherUser || "User not found!");
+      
 
           return { ...conv, otherUser };
         });
@@ -87,7 +84,9 @@ export default function ConversationsList() {
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => {
           if (!item.otherUser) return null;
-          console.log(item)
+          console.log("im here: ",item.messages?.[item.messages.length - 1]);
+
+          const lastMessage = item.messages?.[item.messages.length - 1]?.text || "No messages yet";
 
           return (
             <TouchableOpacity
@@ -105,11 +104,14 @@ export default function ConversationsList() {
               className="shadow-md mb-4"
             >
               <Image
-                source={{ uri: item.otherUser.images?.[0]}}
+                source={{ uri: replaceIp(item.otherUser.images?.[0] , process.env.EXPO_PUBLIC_URL) }}
                 style={{ width: 50, height: 50, borderRadius: 25, marginRight: 16 }}
                 className="object-cover"
               />
-              <Text className="text-xl font-medium text-gray-800">{item.otherUser.name}</Text>
+              <View className="flex-1">
+                <Text className="text-xl font-medium text-gray-800">{item.otherUser.name}</Text>
+                <Text className="text-sm text-gray-500">{lastMessage}</Text>
+              </View>
             </TouchableOpacity>
           );
         }}
