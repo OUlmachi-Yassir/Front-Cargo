@@ -17,7 +17,7 @@ const AddCarScreen = () => {
   const [couleur, setCouleur] = useState("")
   const [kilometrage, setKilometrage] = useState("")
   const [price, setPrice] = useState("")
-  const [images, setImagres] = useState<string[]>([])
+  const [images, setImages] = useState<string[]>([])
 
   const [brands, setBrands] = useState<string[]>([])
   const [models, setModels] = useState<string[]>([])
