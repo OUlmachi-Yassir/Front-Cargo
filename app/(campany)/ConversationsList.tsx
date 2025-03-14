@@ -5,6 +5,7 @@ import { getAllUsers } from '~/services/user/profileService';
 import { authService } from '~/services/auth/authService';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
+import { replaceIp } from '~/services/helpers/helpers';
 
 export default function ConversationsList() {
   const [conversations, setConversations] = useState([]);

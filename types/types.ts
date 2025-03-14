@@ -21,4 +21,9 @@ type RootStackParamList = {
     images: string[];
     statut: string;
     entrepriseId: string;
+    annee: number;
+    couleur: string;
+    price:number;
+    kilometrage: number;
+
   }

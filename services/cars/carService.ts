@@ -1,5 +1,4 @@
 import { Car } from "~/types/types";
-import * as FileSystem from 'expo-file-system';
 
 
 export const getAllCars = async (): Promise<Car[]> => {
@@ -60,8 +59,8 @@ export const fetchCarDetails = async (carId: string): Promise<Car> => {
       });
   
       if (!response.ok) {
-        throw new Error('Erreur lors de la création de la voiture');
-      }
+        const errorResponse = await response.text(); 
+        throw new Error(`Erreur lors de la création de la voiture: ${errorResponse}`);      }
   
       return await response.json();
     } catch (error) {
