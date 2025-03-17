@@ -1,14 +1,40 @@
 import { useEffect, useState } from "react"
-import { View, Text, Image, ScrollView, ActivityIndicator, Modal, TouchableOpacity, SafeAreaView, Alert } from "react-native"
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  ActivityIndicator,
+  Modal,
+  TouchableOpacity,
+  SafeAreaView,
+  Alert,
+  Dimensions,
+} from "react-native"
 import { useLocalSearchParams } from "expo-router"
 import { fetchCarDetails } from "~/services/cars/carService"
 import type { Car } from "~/types/types"
 import { replaceIp } from "../../services/helpers/helpers"
-import CalendarPicker from 'react-native-calendar-picker';
+import CalendarPicker from "react-native-calendar-picker"
 import { authService } from "~/services/auth/authService"
 import { jwtDecode } from "jwt-decode"
 import { fetchUserReservations, useReservation } from "~/services/cars/reservationService"
 import { Ionicons } from "@expo/vector-icons"
+
+const { width } = Dimensions.get("window")
+
+const mapReservationStatus = (status: string) => {
+  switch (status) {
+    case "en attente":
+      return "pending"
+    case "réservé":
+      return "approved"
+    case "rejeté":
+      return "rejected"
+    default:
+      return "pending"
+  }
+}
 
 const CarDetails = () => {
   const [car, setCar] = useState<Car | null>(null)
@@ -51,33 +77,31 @@ const CarDetails = () => {
 
   useEffect(() => {
     const fetchReservations = async () => {
-      if (!userId || !id) return;
-  
+      if (!userId || !id) return
+
       try {
-        const data = await fetchUserReservations(userId, id);
-        console.log("Réservations chargées:", data);
-  
+        const data = await fetchUserReservations(userId, id)
+        console.log("Réservations chargées:", data)
+
         if (Array.isArray(data)) {
           const allReservations = data
-            .filter((item: any) => item._id === id) 
-            .flatMap((item: any) => item.reservations || []);
-  
-          const userReservations = allReservations.filter(
-            (reservation: any) => reservation.userId === userId
-          );
-  
-          console.log("Filtered Reservations:", userReservations);
-          setReservations(userReservations);
+            .filter((item: any) => item._id === id)
+            .flatMap((item: any) => item.reservations || [])
+
+          const userReservations = allReservations.filter((reservation: any) => reservation.userId === userId)
+
+          console.log("Filtered Reservations:", userReservations)
+          setReservations(userReservations)
         } else {
-          console.error("Unexpected data structure:", data);
+          console.error("Unexpected data structure:", data)
         }
       } catch (error) {
-        console.error("Error fetching reservations:", error);
+        console.error("Error fetching reservations:", error)
       }
-    };
-  
-    fetchReservations();
-  }, [userId, id]);
+    }
+
+    fetchReservations()
+  }, [userId, id])
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -95,7 +119,7 @@ const CarDetails = () => {
   }, [id])
 
   const isCarReservedForPeriod = (startDate: Date, endDate: Date) => {
-    return reservations.some(reservation => {
+    return reservations.some((reservation) => {
       const reservationStartDate = new Date(reservation.startDate)
       const reservationEndDate = new Date(reservation.endDate)
       return (
@@ -121,10 +145,10 @@ const CarDetails = () => {
   const renderStatusBadge = () => {
     if (!car?.statut) return null
 
-    const isAvailable = car.statut !== "réservé"
+    const isAvailable = car.statut === "bon état"
     return (
-      <View className={`px-3 py-1 rounded-full ${isAvailable ? "bg-green-100" : "bg-red-100"}`}>
-        <Text className={`font-medium ${isAvailable ? "text-green-700" : "text-red-700"}`}>{car.statut}</Text>
+      <View className={`px-4 py-1.5 rounded-full ${isAvailable ? "bg-emerald-500" : "bg-rose-500"}`}>
+        <Text className="font-medium text-white text-xs">{car.statut}</Text>
       </View>
     )
   }
@@ -132,23 +156,29 @@ const CarDetails = () => {
   const renderReservationStatus = () => {
     if (!reservationStatus) return null
 
+    const displayStatus = mapReservationStatus(reservationStatus)
+
     let statusColor = ""
+    let statusBg = ""
     let statusText = ""
     let statusIcon = ""
 
-    switch (reservationStatus) {
+    switch (displayStatus) {
       case "pending":
-        statusColor = "bg-yellow-100"
+        statusColor = "text-amber-600"
+        statusBg = "bg-amber-50"
         statusText = "En attente de confirmation du propriétaire"
         statusIcon = "time-outline"
         break
       case "approved":
-        statusColor = "bg-green-100"
+        statusColor = "text-emerald-600"
+        statusBg = "bg-emerald-50"
         statusText = "Réservation confirmée"
         statusIcon = "checkmark-circle-outline"
         break
       case "rejected":
-        statusColor = "bg-red-100"
+        statusColor = "text-rose-600"
+        statusBg = "bg-rose-50"
         statusText = "Réservation refusée"
         statusIcon = "close-circle-outline"
         break
@@ -157,16 +187,14 @@ const CarDetails = () => {
     }
 
     return (
-      <View className={`mt-4 p-4 rounded-lg ${statusColor}`}>
+      <View className={`mt-4 p-4 rounded-2xl ${statusBg} border border-${statusColor.replace("text-", "")}/20`}>
         <View className="flex-row items-center">
           <Ionicons
             name={statusIcon}
             size={24}
-            color={
-              reservationStatus === "pending" ? "#EAB308" : reservationStatus === "approved" ? "#16A34A" : "#DC2626"
-            }
+            color={displayStatus === "pending" ? "#D97706" : displayStatus === "approved" ? "#059669" : "#E11D48"}
           />
-          <Text className="ml-2 font-semibold">{statusText}</Text>
+          <Text className={`ml-2 font-semibold ${statusColor}`}>{statusText}</Text>
         </View>
       </View>
     )
@@ -174,129 +202,174 @@ const CarDetails = () => {
 
   if (loading)
     return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <ActivityIndicator size="large" color="#3B82F6" />
+      <View className="flex-1 justify-center items-center bg-slate-50">
+        <ActivityIndicator size="large" color="#6366F1" />
       </View>
     )
 
   if (error)
     return (
-      <View className="flex-1 justify-center items-center p-4 bg-white">
-        <Text className="text-red-500 text-center font-medium">{error}</Text>
+      <View className="flex-1 justify-center items-center p-4 bg-slate-50">
+        <Text className="text-rose-500 text-center font-medium">{error}</Text>
       </View>
     )
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-slate-50">
       <ScrollView className="flex-1">
-        <View className="relative h-72">
-          <ScrollView
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onMomentumScrollEnd={(e) => {
-              const contentOffset = e.nativeEvent.contentOffset
-              const viewSize = e.nativeEvent.layoutMeasurement
-              const pageNum = Math.floor(contentOffset.x / viewSize.width)
-              setActiveImageIndex(pageNum)
-            }}
-          >
-            {car?.images?.flat().map((imageUrl, index) => (
-              <Image
-                key={index}
-                source={{ uri: replaceIp(imageUrl, process.env.EXPO_PUBLIC_URL) }}
-                className="w-screen h-72"
-                resizeMode="cover"
-              />
-            ))}
-          </ScrollView>
-
-          {car?.images && car.images.flat().length > 1 && (
-            <View className="absolute bottom-4 left-0 right-0 flex-row justify-center">
-              {car.images.flat().map((_, index) => (
-                <View
+        <View className="relative">
+          <View className="relative h-80 bg-slate-200">
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={(e) => {
+                const contentOffset = e.nativeEvent.contentOffset
+                const viewSize = e.nativeEvent.layoutMeasurement
+                const pageNum = Math.floor(contentOffset.x / viewSize.width)
+                setActiveImageIndex(pageNum)
+              }}
+            >
+              {car?.images?.flat().map((imageUrl, index) => (
+                <Image
                   key={index}
-                  className={`h-2 w-2 rounded-full mx-1 ${index === activeImageIndex ? "bg-white" : "bg-white/50"}`}
+                  source={{ uri: replaceIp(imageUrl, process.env.EXPO_PUBLIC_URL) }}
+                  className="w-screen h-80"
+                  resizeMode="cover"
                 />
               ))}
-            </View>
-          )}
-        </View>
+            </ScrollView>
 
-        <View className="p-5">
-          <View className="flex-row justify-between items-center">
-            <View className="flex-1">
-              <Text className="text-2xl font-bold text-gray-900">
-                {car?.marque} {car?.modele}
-              </Text>
-              <Text className="text-lg font-semibold text-gray-700 mt-1">{car?.annee}</Text>
-            </View>
-            {renderStatusBadge()}
+            {car?.images && car.images.flat().length > 1 && (
+              <View className="absolute bottom-4 left-0 right-0 flex-row justify-center">
+                {car.images.flat().map((_, index) => (
+                  <View
+                    key={index}
+                    className={`h-1.5 w-8 rounded-full mx-1 ${
+                      index === activeImageIndex ? "bg-indigo-500" : "bg-white/50"
+                    }`}
+                  />
+                ))}
+              </View>
+            )}
+
+            <View className="absolute top-4 right-4">{renderStatusBadge()}</View>
           </View>
 
-          {renderReservationStatus()}
-
-          <View className="mt-6 bg-gray-50 rounded-xl p-4">
-            <Text className="text-lg font-semibold mb-3 text-gray-800">Caractéristiques</Text>
-
-            <View className="flex-row flex-wrap">
-              <View className="w-1/2 mb-4">
-                <Text className="text-gray-500">Couleur</Text>
-                <Text className="font-medium text-gray-800">{car?.couleur || "N/A"}</Text>
+          <View className="px-5 pt-6 pb-20">
+            <View className="bg-white rounded-3xl p-6 shadow-sm -mt-10 mb-6">
+              <View className="flex-row justify-between items-start">
+                <View className="flex-1">
+                  <Text className="text-2xl font-bold text-slate-800">
+                    {car?.marque} {car?.modele}
+                  </Text>
+                  <Text className="text-lg font-medium text-orange-500 mt-1">{car?.annee}</Text>
+                </View>
+                {car?.price && (
+                  <View className="bg-indigo-100 px-3 py-1 rounded-lg">
+                    <Text className="font-semibold text-indigo-700">{car.price} €/jour</Text>
+                  </View>
+                )}
               </View>
 
-              <View className="w-1/2 mb-4">
-                <Text className="text-gray-500">Kilométrage</Text>
-                <Text className="font-medium text-gray-800">{car?.kilometrage || "N/A"} km</Text>
+              {renderReservationStatus()}
+
+              <View className="mt-6 pt-6 border-t border-slate-100">
+                <Text className="text-lg font-semibold mb-4 text-slate-800">Caractéristiques</Text>
+
+                <View className="flex-row flex-wrap">
+                  <View className="w-1/2 mb-4 flex-row items-center">
+                    <View className="w-8 h-8 rounded-full bg-orange-100 items-center justify-center mr-2">
+                      <Ionicons name="color-palette-outline" size={16} color="#FFA500" />
+                    </View>
+                    <View>
+                      <Text className="text-xs text-slate-500">Couleur</Text>
+                      <Text className="font-medium text-slate-800">{car?.couleur || "N/A"}</Text>
+                    </View>
+                  </View>
+
+                  <View className="w-1/2 mb-4 flex-row items-center">
+                    <View className="w-8 h-8 rounded-full bg-orange-100 items-center justify-center mr-2">
+                      <Ionicons name="speedometer-outline" size={16} color="#FFA500" />
+                    </View>
+                    <View>
+                      <Text className="text-xs text-slate-500">Kilométrage</Text>
+                      <Text className="font-medium text-slate-800">{car?.kilometrage || "N/A"} km</Text>
+                    </View>
+                  </View>
+                </View>
               </View>
             </View>
+
+
+            <View className="bg-white rounded-3xl p-6 shadow-sm mb-6">
+              <Text className="text-lg font-semibold mb-4 text-slate-800">Vos réservations</Text>
+
+              {reservations.length > 0 ? (
+                reservations.map((reservation, index) => {
+                  const startDate = new Date(reservation.startDate).toLocaleDateString("fr-FR")
+                  const endDate = new Date(reservation.endDate).toLocaleDateString("fr-FR")
+
+                  const status = reservation.statut || "en attente"
+                  const isApproved = status === "réservé"
+                  const isRejected = status === "rejeté"
+
+                  let bgColor = "bg-amber-50"
+                  let textColor = "text-amber-600"
+                  let iconName = "time-outline"
+                  let iconColor = "#D97706"
+                  let statusText = "En attente"
+
+                  if (isApproved) {
+                    bgColor = "bg-emerald-50"
+                    textColor = "text-emerald-600"
+                    iconName = "checkmark-circle"
+                    iconColor = "#059669"
+                    statusText = "Confirmée"
+                  } else if (isRejected) {
+                    bgColor = "bg-rose-50"
+                    textColor = "text-rose-600"
+                    iconName = "close-circle"
+                    iconColor = "#E11D48"
+                    statusText = "Rejetée"
+                  }
+
+                  return (
+                    <View key={index} className={`mb-4 p-4 rounded-xl ${bgColor}`}>
+                      <View className="flex-row items-center mb-2">
+                        <Ionicons name={iconName} size={20} color={iconColor} />
+                        <Text className={`ml-2 font-semibold ${textColor}`}>{statusText}</Text>
+                      </View>
+                      <View className="flex-row items-center">
+                        <Ionicons name="calendar-outline" size={16} color="#6B7280" />
+                        <Text className="ml-2 text-slate-600">
+                          Du {startDate} au {endDate}
+                        </Text>
+                      </View>
+                    </View>
+                  )
+                })
+              ) : (
+                <View className="bg-slate-50 p-4 rounded-xl">
+                  <Text className="text-slate-500 text-center">Aucune réservation pour le moment.</Text>
+                </View>
+              )}
+            </View>
+
+            {!reservationStatus && (
+              <TouchableOpacity
+                className="bg-orange-500 py-4 px-6 rounded-2xl shadow-md"
+                onPress={() => setIsModalVisible(true)}
+              >
+                <View className="flex-row items-center justify-center">
+                  <Ionicons name="calendar" size={20} color="white" />
+                  <Text className="text-white text-center font-bold text-lg ml-2">Réserver cette voiture</Text>
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
-
-          {car?.description && (
-            <View className="mt-6">
-              <Text className="text-lg font-semibold mb-2 text-gray-800">Description</Text>
-              <Text className="text-gray-600 leading-relaxed">{car.description}</Text>
-            </View>
-          )}
-
-          {!reservationStatus && (
-            <TouchableOpacity
-              className="mt-8 bg-blue-600 py-4 rounded-xl shadow-sm"
-              onPress={() => setIsModalVisible(true)}
-            >
-              <Text className="text-white text-center font-bold text-lg">Réserver cette voiture</Text>
-            </TouchableOpacity>
-          )}
         </View>
       </ScrollView>
-
-      <View className="mt-6 bg-gray-50 rounded-xl p-4">
-          <Text className="text-lg font-semibold mb-3 text-gray-800">Your Reservation For This Car</Text>
-          {reservations.length > 0 ? (
-              reservations.map((reservation, index) => {
-                const startDate = new Date(reservation.startDate).toLocaleDateString('fr-FR');
-                const endDate = new Date(reservation.endDate).toLocaleDateString('fr-FR');
-
-                return (
-                  <View key={index} className="border-b border-gray-300 pb-3 mb-3">
-                    <Text className="text-gray-800 font-semibold">
-                    </Text>
-                    <Text className="text-gray-500">
-                      Du {startDate} au {endDate}
-                    </Text>
-                    <Text
-                      className={`font-medium ${reservation.status === "approved" ? "text-green-600" : "text-yellow-600"}`}
-                    >
-                      {reservation.status === "approved" ? "Confirmée" : "En attente"}
-                    </Text>
-                  </View>
-                );
-              })
-            ) : (
-              <Text className="text-gray-500">Aucune réservation pour le moment.</Text>
-            )}
-        </View>
-
 
       <Modal
         visible={isModalVisible}
@@ -305,53 +378,66 @@ const CarDetails = () => {
         onRequestClose={() => setIsModalVisible(false)}
       >
         <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white rounded-t-3xl p-5 h-4/5">
+          <View className="bg-white rounded-t-3xl p-6 h-4/5">
             <View className="flex-row justify-between items-center mb-6">
-              <Text className="text-xl font-bold text-gray-900">Sélectionnez les dates</Text>
+              <Text className="text-xl font-bold text-slate-800">Sélectionnez les dates</Text>
               <TouchableOpacity
-                className="h-10 w-10 rounded-full bg-gray-100 items-center justify-center"
+                className="h-10 w-10 rounded-full bg-slate-100 items-center justify-center"
                 onPress={() => setIsModalVisible(false)}
               >
-                <Ionicons name="close" size={20} color="#374151" />
+                <Ionicons name="close" size={20} color="#4B5563" />
               </TouchableOpacity>
             </View>
 
-            <CalendarPicker
-              onDateChange={(date, type) => {
-                if (type === "START_DATE") {
-                  setStartDate(date)
-                } else {
-                  setEndDate(date)
-                }
-              }}
-              selectedStartDate={startDate || undefined}
-              selectedEndDate={endDate || undefined}
-              allowRangeSelection={true}
-              minDate={new Date()}
-              selectedDayColor="#3B82F6"
-              selectedDayTextColor="#FFFFFF"
-              todayBackgroundColor="#E5E7EB"
-              todayTextStyle={{ color: "#1F2937" }}
-              width={350}
-            />
+            <View className="bg-slate-50 rounded-2xl p-4 mb-6">
+              <CalendarPicker
+                onDateChange={(date, type) => {
+                  if (type === "START_DATE") {
+                    setStartDate(date)
+                  } else {
+                    setEndDate(date)
+                  }
+                }}
+                selectedStartDate={startDate || undefined}
+                selectedEndDate={endDate || undefined}
+                allowRangeSelection={true}
+                minDate={new Date()}
+                selectedDayColor="#FFA500"
+                selectedDayTextColor="#FFFFFF"
+                todayBackgroundColor="#EEF2FF"
+                todayTextStyle={{ color: "#4F46E5" }}
+                textStyle={{ color: "#1F2937" }}
+                width={width - 60}
+              />
+            </View>
 
             <View className="mt-auto">
-              <View className="flex-row justify-between items-center mb-4">
-                <Text className="text-gray-500">Dates sélectionnées:</Text>
-                <Text className="font-medium">
-                  {startDate ? startDate.toLocaleDateString() : "---"}
-                  {endDate ? ` → ${endDate.toLocaleDateString()}` : ""}
-                </Text>
+              <View className="flex-row justify-between items-center mb-6 p-4 bg-orange-50 rounded-xl">
+                <View>
+                  <Text className="text-slate-500 text-sm">Dates sélectionnées</Text>
+                  <Text className="font-medium text-slate-800 text-base">
+                    {startDate ? startDate.toLocaleDateString() : "---"}
+                    {endDate ? ` → ${endDate.toLocaleDateString()}` : ""}
+                  </Text>
+                </View>
+                <Ionicons name="calendar" size={24} color="#6366F1" />
               </View>
 
               <TouchableOpacity
-                className={`py-4 rounded-xl ${reservationLoading || !startDate || !endDate ? "bg-blue-300" : "bg-blue-600"}`}
+                className={`py-4 rounded-xl flex-row items-center justify-center ${
+                  reservationLoading || !startDate || !endDate ? "bg-orange-500" : "bg-orange-600"
+                }`}
                 onPress={handleReserve}
                 disabled={reservationLoading || !startDate || !endDate}
               >
-                <Text className="text-white text-center font-bold text-lg">
-                  {reservationLoading ? "Traitement en cours..." : "Confirmer la réservation"}
-                </Text>
+                {reservationLoading ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <>
+                    <Ionicons name="checkmark-circle" size={20} color="white" />
+                    <Text className="text-white text-center font-bold text-lg ml-2">Confirmer la réservation</Text>
+                  </>
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -362,3 +448,4 @@ const CarDetails = () => {
 }
 
 export default CarDetails
+
