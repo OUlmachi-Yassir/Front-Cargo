@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { View, Text, Image, ActivityIndicator, Dimensions, TouchableOpacity, ScrollView } from "react-native"
+import { View, Text, Image, ActivityIndicator, Dimensions, TouchableOpacity, ScrollView, TextInput} from "react-native"
 import { getAllCars } from "~/services/cars/carService"
 import type { Car } from "~/types/types"
 import { useRouter } from "expo-router"
@@ -8,6 +8,7 @@ import { getAllUsers } from "~/services/user/profileService"
 import tw from "twrnc"
 import { authService } from "~/services/auth/authService"
 import { jwtDecode } from "jwt-decode"
+import { fetchBrands, fetchColors, fetchModels } from "~/services/cars/api"
 
 const { width } = Dimensions.get("window")
 
@@ -23,6 +24,15 @@ const ClientHome = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [currentImageIndexes, setCurrentImageIndexes] = useState<Record<string, number>>({})
+  const [brands, setBrands] = useState<string[]>([])
+  const [models, setModels] = useState<string[]>([])
+  const [colors, setColors] = useState<string[]>([])
+  const [selectedBrand, setSelectedBrand] = useState("")
+  const [selectedModel, setSelectedModel] = useState("")
+  const [selectedColor, setSelectedColor] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
+  
+  const [expandedFilter, setExpandedFilter] = useState<string | null>(null)
 
   const router = useRouter()
 
@@ -61,6 +71,26 @@ const ClientHome = () => {
     fetchCompanies()
   }, [])
 
+  useEffect(() => {
+    const loadFilters = async () => {
+      const brands = await fetchBrands()
+      setBrands(brands)
+      const colors = await fetchColors()
+      setColors(colors)
+    }
+    loadFilters()
+  }, [])
+
+  useEffect(() => {
+    const loadModels = async () => {
+      if (selectedBrand) {
+        const models = await fetchModels(selectedBrand)
+        setModels(models)
+      }
+    }
+    loadModels()
+  }, [selectedBrand])
+
   const startChat = async (receiverId: string) => {
     try {
       const token = await authService.getToken()
@@ -90,30 +120,47 @@ const ClientHome = () => {
       [carId]: (prev[carId] - 1 + imagesLength) % imagesLength,
     }))
   }
+  
+  const toggleFilter = (filterName: string) => {
+    if (expandedFilter === filterName) {
+      setExpandedFilter(null)
+    } else {
+      setExpandedFilter(filterName)
+    }
+  }
+
+  const filteredCars = cars.filter((car) => {
+    return (
+      (selectedBrand ? car.marque === selectedBrand : true) &&
+      (selectedModel ? car.modele === selectedModel : true) &&
+      (selectedColor ? car.couleur === selectedColor : true) &&
+      (searchQuery ? car.marque.toLowerCase().includes(searchQuery.toLowerCase()) || car.modele.toLowerCase().includes(searchQuery.toLowerCase()) : true)
+    )
+  })
 
   if (loading)
     return (
-      <View style={tw`flex-1 justify-center items-center`}>
-        <ActivityIndicator size="large" color="#3b82f6" />
+      <View style={tw`flex-1 justify-center items-center bg-white`}>
+        <ActivityIndicator size="large" color="#f97316" />
       </View>
     )
 
   if (error)
     return (
-      <View style={tw`flex-1 justify-center items-center p-4`}>
-        <Text style={tw`text-red-500 text-lg`}>{error}</Text>
+      <View style={tw`flex-1 justify-center items-center p-4 bg-white`}>
+        <Text style={tw`text-orange-500 text-lg`}>{error}</Text>
       </View>
     )
 
   return (
-    <ScrollView style={tw`flex-1 bg-gray-50`}>
+    <ScrollView style={tw`flex-1 bg-white`}>
       <View style={tw`p-4`}>
-        <Text style={tw`text-2xl font-bold mb-4 text-center text-gray-800`}>Entreprises</Text>
+        <Text style={tw`text-2xl font-bold mb-4 text-center text-orange-600`}>Entreprises</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={tw`mb-6`}>
           {companies.map((company) => (
             <TouchableOpacity
               key={company._id}
-              style={tw`mr-4 bg-white rounded-xl shadow-md overflow-hidden w-40`}
+              style={tw`mr-4 bg-white rounded-xl shadow-md overflow-hidden w-40 border border-orange-200`}
               onPress={() => startChat(company._id)}
             >
               <Image
@@ -126,18 +173,151 @@ const ClientHome = () => {
               />
               <View style={tw`p-3`}>
                 <Text style={tw`font-semibold text-gray-800 text-center`}>{company.name}</Text>
-                <Text style={tw`text-blue-500 text-center text-xs mt-1`}>Contacter</Text>
+                <Text style={tw`text-orange-500 text-center text-xs mt-1`}>Contacter</Text>
               </View>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
-        <Text style={tw`text-2xl font-bold mb-4 text-center text-gray-800`}>Voitures disponibles</Text>
+        <Text style={tw`text-2xl font-bold mb-4 text-center text-orange-600`}>Voitures disponibles</Text>
 
-        {cars.map((car) => (
+        <View style={tw`mb-4`}>
+          <TextInput
+            style={tw`border border-orange-300 rounded-lg p-2 mb-4 bg-white`}
+            placeholder="Rechercher par marque ou modèle..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          
+          {/* Filter buttons */}
+          <View style={tw`flex-row flex-wrap justify-between mb-2`}>
+            <TouchableOpacity 
+              style={tw`bg-white border-2 ${selectedBrand ? 'border-orange-500' : 'border-orange-300'} rounded-lg py-2 px-4 mb-2 w-[48%]`}
+              onPress={() => toggleFilter('brands')}
+            >
+              <Text style={tw`text-center text-orange-700 font-medium`}>
+                {selectedBrand || 'Marques'}
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={tw`bg-white border-2 ${selectedModel ? 'border-orange-500' : 'border-orange-300'} rounded-lg py-2 px-4 mb-2 w-[48%]`}
+              onPress={() => toggleFilter('models')}
+              disabled={!selectedBrand}
+            >
+              <Text style={tw`text-center ${!selectedBrand ? 'text-gray-400' : 'text-orange-700'} font-medium`}>
+                {selectedModel || 'Modèles'}
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={tw`bg-white border-2 ${selectedColor ? 'border-orange-500' : 'border-orange-300'} rounded-lg py-2 px-4 mb-2 w-full`}
+              onPress={() => toggleFilter('colors')}
+            >
+              <Text style={tw`text-center text-orange-700 font-medium`}>
+                {selectedColor || 'Couleurs'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Expanded filter options */}
+          {expandedFilter === 'brands' && (
+            <View style={tw`bg-white border border-orange-200 rounded-lg p-2 mb-4 shadow-sm`}>
+              <ScrollView style={tw`max-h-40`}>
+                <View style={tw`flex-row flex-wrap`}>
+                  <TouchableOpacity 
+                    style={tw`m-1 px-3 py-1.5 rounded-full ${selectedBrand === '' ? 'bg-orange-500' : 'bg-orange-100'}`}
+                    onPress={() => {
+                      setSelectedBrand('')
+                      setSelectedModel('')
+                      setExpandedFilter(null)
+                    }}
+                  >
+                    <Text style={tw`${selectedBrand === '' ? 'text-white' : 'text-orange-700'}`}>Toutes</Text>
+                  </TouchableOpacity>
+                  {brands.map(brand => (
+                    <TouchableOpacity 
+                      key={brand}
+                      style={tw`m-1 px-3 py-1.5 rounded-full ${selectedBrand === brand ? 'bg-orange-500' : 'bg-orange-100'}`}
+                      onPress={() => {
+                        setSelectedBrand(brand)
+                        setSelectedModel('')
+                        setExpandedFilter(null)
+                      }}
+                    >
+                      <Text style={tw`${selectedBrand === brand ? 'text-white' : 'text-orange-700'}`}>{brand}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
+          )}
+          
+          {expandedFilter === 'models' && selectedBrand && (
+            <View style={tw`bg-white border border-orange-200 rounded-lg p-2 mb-4 shadow-sm`}>
+              <ScrollView style={tw`max-h-40`}>
+                <View style={tw`flex-row flex-wrap`}>
+                  <TouchableOpacity 
+                    style={tw`m-1 px-3 py-1.5 rounded-full ${selectedModel === '' ? 'bg-orange-500' : 'bg-orange-100'}`}
+                    onPress={() => {
+                      setSelectedModel('')
+                      setExpandedFilter(null)
+                    }}
+                  >
+                    <Text style={tw`${selectedModel === '' ? 'text-white' : 'text-orange-700'}`}>Tous</Text>
+                  </TouchableOpacity>
+                  {models.map(model => (
+                    <TouchableOpacity 
+                      key={model}
+                      style={tw`m-1 px-3 py-1.5 rounded-full ${selectedModel === model ? 'bg-orange-500' : 'bg-orange-100'}`}
+                      onPress={() => {
+                        setSelectedModel(model)
+                        setExpandedFilter(null)
+                      }}
+                    >
+                      <Text style={tw`${selectedModel === model ? 'text-white' : 'text-orange-700'}`}>{model}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
+          )}
+          
+          {expandedFilter === 'colors' && (
+            <View style={tw`bg-white border border-orange-200 rounded-lg p-2 mb-4 shadow-sm`}>
+              <ScrollView style={tw`max-h-40`}>
+                <View style={tw`flex-row flex-wrap`}>
+                  <TouchableOpacity 
+                    style={tw`m-1 px-3 py-1.5 rounded-full ${selectedColor === '' ? 'bg-orange-500' : 'bg-orange-100'}`}
+                    onPress={() => {
+                      setSelectedColor('')
+                      setExpandedFilter(null)
+                    }}
+                  >
+                    <Text style={tw`${selectedColor === '' ? 'text-white' : 'text-orange-700'}`}>Toutes</Text>
+                  </TouchableOpacity>
+                  {colors.map(color => (
+                    <TouchableOpacity 
+                      key={color}
+                      style={tw`m-1 px-3 py-1.5 rounded-full ${selectedColor === color ? 'bg-orange-500' : 'bg-orange-100'}`}
+                      onPress={() => {
+                        setSelectedColor(color)
+                        setExpandedFilter(null)
+                      }}
+                    >
+                      <Text style={tw`${selectedColor === color ? 'text-white' : 'text-orange-700'}`}>{color}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
+          )}
+        </View>
+
+        {filteredCars.map((car) => (
           <TouchableOpacity
             key={car._id}
-            style={tw`bg-white rounded-xl shadow-md mb-6 overflow-hidden`}
+            style={tw`bg-white rounded-xl shadow-md mb-6 overflow-hidden border border-orange-200`}
             onPress={() => router.push({ pathname: "/CarDetails", params: { id: car._id } })}
           >
             <View style={tw`relative`}>
@@ -157,7 +337,7 @@ const ClientHome = () => {
                     style={tw`h-full px-2 justify-center`}
                     onPress={() => prevImage(car._id, car.images.flat().length)}
                   >
-                    <View style={tw`bg-black bg-opacity-30 rounded-full p-2`}>
+                    <View style={tw`bg-orange-500 bg-opacity-70 rounded-full p-2`}>
                       <Text style={tw`text-white text-xl font-bold`}>{"<"}</Text>
                     </View>
                   </TouchableOpacity>
@@ -166,7 +346,7 @@ const ClientHome = () => {
                     style={tw`h-full px-2 justify-center`}
                     onPress={() => nextImage(car._id, car.images.flat().length)}
                   >
-                    <View style={tw`bg-black bg-opacity-30 rounded-full p-2`}>
+                    <View style={tw`bg-orange-500 bg-opacity-70 rounded-full p-2`}>
                       <Text style={tw`text-white text-xl font-bold`}>{">"}</Text>
                     </View>
                   </TouchableOpacity>
@@ -179,7 +359,7 @@ const ClientHome = () => {
                     <View
                       key={index}
                       style={tw`h-2 w-2 rounded-full mx-1 ${
-                        index === currentImageIndexes[car._id] ? "bg-white" : "bg-gray-400 bg-opacity-60"
+                        index === currentImageIndexes[car._id] ? "bg-orange-500" : "bg-white bg-opacity-70"
                       }`}
                     />
                   ))}
@@ -188,7 +368,7 @@ const ClientHome = () => {
             </View>
 
             <View style={tw`p-4`}>
-              <Text style={tw`text-xl font-bold text-gray-800`}>
+              <Text style={tw`text-xl font-bold text-orange-700`}>
                 {car.marque} {car.modele}
               </Text>
 
@@ -196,7 +376,7 @@ const ClientHome = () => {
                 <Text style={tw`${car.statut === "réservé" ? "text-red-500" : "text-green-500"} font-semibold`}>
                   {car.statut}
                 </Text>
-                <View style={tw`bg-blue-500 px-3 py-1 rounded-full`}>
+                <View style={tw`bg-orange-500 px-3 py-1 rounded-full`}>
                   <Text style={tw`text-white font-medium`}>Voir détails</Text>
                 </View>
               </View>
@@ -209,4 +389,3 @@ const ClientHome = () => {
 }
 
 export default ClientHome
-
