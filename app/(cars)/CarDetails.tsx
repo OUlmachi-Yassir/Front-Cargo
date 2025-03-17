@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { View, Text, Image, ScrollView, ActivityIndicator, Modal, TouchableOpacity, SafeAreaView } from "react-native"
+import { View, Text, Image, ScrollView, ActivityIndicator, Modal, TouchableOpacity, SafeAreaView, Alert } from "react-native"
 import { useLocalSearchParams } from "expo-router"
 import { fetchCarDetails } from "~/services/cars/carService"
 import type { Car } from "~/types/types"
@@ -53,9 +53,16 @@ const CarDetails = () => {
     const fetchReservations = async () => {
       if (!userId) return
       const data = await fetchUserReservations(userId)
-      console.log("Réservations chargées:", data[0]?.reservations) // Accéder aux réservations dans l'objet
-      setReservations(data[0]?.reservations || []) 
-
+      console.log(userId)
+      console.log("Réservations chargées:", data[0]?._id) 
+      
+      if(data[0]?.reservations[0].userId === userId && data[0]._id === id){
+        const filteredReservations = data[0]?.reservations
+        console.log("imhere",filteredReservations)
+        setReservations(filteredReservations) 
+      }else{
+        return console.log("this id dont exist ",data[0]?.reservations[0]?.userId)
+      }
     }
     fetchReservations()
   }, [userId])
@@ -75,8 +82,26 @@ const CarDetails = () => {
     fetchDetails()
   }, [id])
 
+  const isCarReservedForPeriod = (startDate: Date, endDate: Date) => {
+    return reservations.some(reservation => {
+      const reservationStartDate = new Date(reservation.startDate)
+      const reservationEndDate = new Date(reservation.endDate)
+      return (
+        (startDate >= reservationStartDate && startDate <= reservationEndDate) ||
+        (endDate >= reservationStartDate && endDate <= reservationEndDate) ||
+        (startDate <= reservationStartDate && endDate >= reservationEndDate)
+      )
+    })
+  }
+
   const handleReserve = async () => {
-    if (!id) return
+    if (!id || !startDate || !endDate) return
+
+    if (isCarReservedForPeriod(startDate, endDate)) {
+      Alert.alert("Erreur", "Cette voiture est déjà réservée pour cette période.")
+      return
+    }
+
     await handleReservation(id)
     setIsModalVisible(false)
   }
@@ -152,7 +177,6 @@ const CarDetails = () => {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView className="flex-1">
-        {/* Image Gallery */}
         <View className="relative h-72">
           <ScrollView
             horizontal
@@ -175,7 +199,6 @@ const CarDetails = () => {
             ))}
           </ScrollView>
 
-          {/* Image Pagination Dots */}
           {car?.images && car.images.flat().length > 1 && (
             <View className="absolute bottom-4 left-0 right-0 flex-row justify-center">
               {car.images.flat().map((_, index) => (
@@ -188,9 +211,7 @@ const CarDetails = () => {
           )}
         </View>
 
-        {/* Content Container */}
         <View className="p-5">
-          {/* Header Section */}
           <View className="flex-row justify-between items-center">
             <View className="flex-1">
               <Text className="text-2xl font-bold text-gray-900">
@@ -201,10 +222,8 @@ const CarDetails = () => {
             {renderStatusBadge()}
           </View>
 
-          {/* Reservation Status */}
           {renderReservationStatus()}
 
-          {/* Car Details Section */}
           <View className="mt-6 bg-gray-50 rounded-xl p-4">
             <Text className="text-lg font-semibold mb-3 text-gray-800">Caractéristiques</Text>
 
@@ -221,7 +240,6 @@ const CarDetails = () => {
             </View>
           </View>
 
-          {/* Description Section */}
           {car?.description && (
             <View className="mt-6">
               <Text className="text-lg font-semibold mb-2 text-gray-800">Description</Text>
@@ -229,7 +247,6 @@ const CarDetails = () => {
             </View>
           )}
 
-          {/* Reservation Button */}
           {!reservationStatus && (
             <TouchableOpacity
               className="mt-8 bg-blue-600 py-4 rounded-xl shadow-sm"
@@ -269,7 +286,6 @@ const CarDetails = () => {
         </View>
 
 
-      {/* Reservation Modal */}
       <Modal
         visible={isModalVisible}
         animationType="slide"
@@ -334,4 +350,3 @@ const CarDetails = () => {
 }
 
 export default CarDetails
-
