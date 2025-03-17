@@ -18,7 +18,6 @@ const CarDetails = () => {
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [reservations, setReservations] = useState<any[]>([])
-  const [hasPendingReservation, setHasPendingReservation] = useState(false)
 
   const { id } = useLocalSearchParams<{ id: string }>()
 
@@ -52,22 +51,33 @@ const CarDetails = () => {
 
   useEffect(() => {
     const fetchReservations = async () => {
-      if (!userId) return
-      const data = await fetchUserReservations(userId)
-      console.log(userId)
-      console.log("Réservations chargées:", data[0]?._id) 
-      
-      if(data[0]?.reservations[0].userId === userId && data[0]._id === id){
-        const filteredReservations = data[0]?.reservations
-        console.log("imhere",filteredReservations)
-        setReservations(filteredReservations)
-        setHasPendingReservation(filteredReservations.some(res => res.status === "pending"))
-      }else{
-        return console.log("this id dont exist ",data[0]?.reservations[0]?.userId)
+      if (!userId || !id) return;
+  
+      try {
+        const data = await fetchUserReservations(userId, id);
+        console.log("Réservations chargées:", data);
+  
+        if (Array.isArray(data)) {
+          const allReservations = data
+            .filter((item: any) => item._id === id) 
+            .flatMap((item: any) => item.reservations || []);
+  
+          const userReservations = allReservations.filter(
+            (reservation: any) => reservation.userId === userId
+          );
+  
+          console.log("Filtered Reservations:", userReservations);
+          setReservations(userReservations);
+        } else {
+          console.error("Unexpected data structure:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching reservations:", error);
       }
-    }
-    fetchReservations()
-  }, [userId])
+    };
+  
+    fetchReservations();
+  }, [userId, id]);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -99,17 +109,13 @@ const CarDetails = () => {
   const handleReserve = async () => {
     if (!id || !startDate || !endDate) return
 
-    try {
-      await handleReservation(id);
-      setIsModalVisible(false);
-      setHasPendingReservation(true);
-    } catch (error) {
-      if (error.response?.data?.message === 'Cette voiture est déjà réservée pour cette période') {
-        Alert.alert('Erreur', 'Cette voiture est déjà réservée pour cette période.');
-      } else {
-        Alert.alert('Erreur', 'Une erreur s\'est produite lors de la réservation.');
-      }
+    if (isCarReservedForPeriod(startDate, endDate)) {
+      Alert.alert("Erreur", "Cette voiture est déjà réservée pour cette période.")
+      return
     }
+
+    await handleReservation(id)
+    setIsModalVisible(false)
   }
 
   const renderStatusBadge = () => {
@@ -253,19 +259,13 @@ const CarDetails = () => {
             </View>
           )}
 
-          {!reservationStatus && !hasPendingReservation && (
+          {!reservationStatus && (
             <TouchableOpacity
               className="mt-8 bg-blue-600 py-4 rounded-xl shadow-sm"
               onPress={() => setIsModalVisible(true)}
             >
               <Text className="text-white text-center font-bold text-lg">Réserver cette voiture</Text>
             </TouchableOpacity>
-          )}
-
-          {hasPendingReservation && (
-            <View className="mt-8 bg-yellow-100 py-4 rounded-xl shadow-sm">
-              <Text className="text-yellow-800 text-center font-bold text-lg">Réservation en attente de confirmation</Text>
-            </View>
           )}
         </View>
       </ScrollView>
