@@ -54,22 +54,22 @@ const ChatScreen: React.FC<Props> = () => {
   
     socket.emit('joinRoom', { senderId: loggedUserId, receiverId });
   
-    const handleMessage = (newMessage: { senderId: string; receiverId: string; messages: { text: string }[] }) => {
+    const handleMessage = (newMessage: { senderId: string; receiverId: string; text: string }) => {
       if (
         (newMessage.senderId === loggedUserId && newMessage.receiverId === receiverId) ||
         (newMessage.senderId === receiverId && newMessage.receiverId === loggedUserId)
       ) {
-        setMessages((prevMessages) => [...prevMessages, ...newMessage.messages]);
+        setMessages((prevMessages) => [...prevMessages, { sender: newMessage.senderId, receiverId: newMessage.receiverId, text: newMessage.text }]);
       }
     };
   
-    socket.on('message', handleMessage);
+    socket.on('receiveMessage', handleMessage);
   
     return () => {
-      socket.off('message', handleMessage);
+      socket.off('receiveMessage', handleMessage);
       socket.emit('leaveRoom', { senderId: loggedUserId, receiverId });
     };
-  }, [receiverId, loggedUserId]); 
+  }, [receiverId, loggedUserId]);
   
 
   const handleSendMessage = async () => {
@@ -87,19 +87,22 @@ const ChatScreen: React.FC<Props> = () => {
     const messageData = {
       senderId: loggedUser,
       receiverId,
-      messages: [{ text: newMessage }], 
+      text: newMessage,
     };
   
     try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_APP_API_URL}/conversations`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(messageData),
       });
   
       if (!response.ok) throw new Error('Failed to send message');
   
-      setMessages((prevMessages) => [...prevMessages, messageData]);
+      setMessages((prevMessages) => [...prevMessages, { sender: loggedUser, receiverId, text: newMessage }]);
   
       socket.emit('sendMessage', messageData);
   

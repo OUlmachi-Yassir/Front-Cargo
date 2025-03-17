@@ -73,7 +73,6 @@ export const fetchUserReservations = async () => {
       },
     });
 
-    // Affiche les détails de la réponse pour comprendre l'erreur
     const responseBody = await response.json();
     if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}, ${responseBody.message || "Aucune réponse détaillée"}`);
 
@@ -81,6 +80,6 @@ export const fetchUserReservations = async () => {
   } catch (error) {
     console.error("Erreur lors de la récupération des réservations :", error);
     Alert.alert("Erreur", error.message || "Une erreur inconnue est survenue");
-    return [];  // Retourne un tableau vide en cas d'erreur
+    return [];  
   }
 };
