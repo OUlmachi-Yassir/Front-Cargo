@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, SafeAreaView } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RootStackParamList from '../../types/types';
 import { authService } from '~/services/auth/authService';
 import ErrorService from '~/services/error/ErrorService';
 import { useRouter } from 'expo-router';
+import tw from 'twrnc';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function Login() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const rooter = useRouter()
+  const rooter = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,10 +25,9 @@ export default function Login() {
     setLoading(true);
     try {
       const userData = await authService.login(email, password);
-      const role= await authService.getRole();
-      console.log(role)
+      const role = await authService.getRole();
+      console.log(role);
      
-
       Alert.alert('Succès', 'Connexion réussie !');
 
       if (role === 'user') {
@@ -45,9 +46,9 @@ export default function Login() {
     }
   };
 
-  useEffect( () => {
+  useEffect(() => {
     const check = async() => {
-      const token =  await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem('token');
       const role = await AsyncStorage.getItem('role');
       if (token) {
         if (role === 'user') {
@@ -59,58 +60,88 @@ export default function Login() {
         }
       }
     }
-check();
+    check();
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        keyboardType="email-address"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-      <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Connexion...' : 'Log In'}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => rooter.push('/(auth)/signup')}>
-        <Text style={styles.link}>Don't have an account? Sign up</Text>
-      </TouchableOpacity>
-    </View>
+    <SafeAreaView style={tw`flex-1 bg-white`}>
+      <View style={tw`flex-1 justify-center px-6`}>
+        <View style={tw`mb-10`}>
+          <Text style={tw`text-3xl font-bold text-orange-600 text-center`}>Bienvenue</Text>
+          <Text style={tw`text-gray-500 text-center mt-2`}>Connectez-vous à votre compte</Text>
+        </View>
+        
+        <View style={tw`mb-6`}>
+          <View style={tw`mb-4`}>
+            <Text style={tw`text-gray-700 font-medium mb-2 ml-1`}>Email</Text>
+            <View style={tw`flex-row items-center border border-gray-300 rounded-xl bg-gray-50 px-3 py-2`}>
+              <Ionicons name="mail-outline" size={20} color="#f97316" />
+              <TextInput
+                style={tw`flex-1 ml-2 text-gray-800 h-12`}
+                placeholder="Entrez votre email"
+                placeholderTextColor="#9ca3af"
+                keyboardType="email-address"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+              />
+            </View>
+          </View>
+          
+          <View style={tw`mb-6`}>
+            <Text style={tw`text-gray-700 font-medium mb-2 ml-1`}>Mot de passe</Text>
+            <View style={tw`flex-row items-center border border-gray-300 rounded-xl bg-gray-50 px-3 py-2`}>
+              <Ionicons name="lock-closed-outline" size={20} color="#f97316" />
+              <TextInput
+                style={tw`flex-1 ml-2 text-gray-800 h-12`}
+                placeholder="Entrez votre mot de passe"
+                placeholderTextColor="#9ca3af"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+              />
+            </View>
+          </View>
+          
+          <TouchableOpacity style={tw`self-end mb-6`}>
+            <Text style={tw`text-orange-600 font-medium`}>Mot de passe oublié ?</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={tw`bg-orange-500 py-4 rounded-xl shadow-md ${loading ? 'opacity-70' : ''}`}
+            onPress={handleLogin} 
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <Text style={tw`text-white text-center font-bold text-lg`}>Se connecter</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+        
+        <View style={tw`flex-row justify-center mt-6`}>
+          <Text style={tw`text-gray-600`}>Vous n'avez pas de compte ? </Text>
+          <TouchableOpacity onPress={() => rooter.push('/(auth)/signup')}>
+            <Text style={tw`text-orange-600 font-bold`}>S'inscrire</Text>
+          </TouchableOpacity>
+        </View>
+        
+        <View style={tw`mt-10`}>
+          <Text style={tw`text-gray-500 text-center mb-4`}>Ou connectez-vous avec</Text>
+          <View style={tw`flex-row justify-center space-x-4`}>
+            <TouchableOpacity style={tw`w-14 h-14 rounded-full bg-gray-100 items-center justify-center border border-gray-200`}>
+              <Ionicons name="logo-google" size={24} color="#DB4437" />
+            </TouchableOpacity>
+            <TouchableOpacity style={tw`w-14 h-14 rounded-full bg-gray-100 items-center justify-center border border-gray-200`}>
+              <Ionicons name="logo-facebook" size={24} color="#4267B2" />
+            </TouchableOpacity>
+            <TouchableOpacity style={tw`w-14 h-14 rounded-full bg-gray-100 items-center justify-center border border-gray-200`}>
+              <Ionicons name="logo-apple" size={24} color="#000000" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#141414' },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 20, color: '#fff' },
-  input: { 
-    height: 50, 
-    backgroundColor: '#333333',  
-    paddingHorizontal: 15, 
-    marginVertical: 10, 
-    color: '#fff', 
-    shadowColor: '#AA0000',
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 0.3, 
-  },
-  button: { 
-    backgroundColor: '#e50914',  
-    paddingVertical: 15, 
-    marginTop: 20,
-    shadowColor: '#AA0000',
-    shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 0.3,
-    elevation: 5,
-  },
-  buttonText: { color: '#fff', fontSize: 18, textAlign: 'center', fontWeight: 'bold' },
-  link: { marginTop: 15, color: '#e50914', textAlign: 'center' },
-});

@@ -10,7 +10,6 @@ import { authService } from "~/services/auth/authService"
 import { jwtDecode } from "jwt-decode"
 import { fetchBrands, fetchColors, fetchModels } from "~/services/cars/api"
 
-const { width } = Dimensions.get("window")
 
 interface Company {
   _id: string
