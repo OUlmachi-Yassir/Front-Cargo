@@ -1,6 +1,6 @@
 import { useNavigation, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { authService } from '~/services/auth/authService';
 import ErrorService from '~/services/error/ErrorService';
 import { RegisterData } from '~/types/types';
@@ -39,20 +39,20 @@ const RegisterScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Inscription</Text>
+    <View className="flex-1 justify-center items-center bg-white p-6">
+      <Text className="text-2xl font-bold mb-8 text-gray-800">Inscription</Text>
 
       {!isCompany ? (
-        <View style={styles.formContainer}>
+        <View className="w-full">
           <TextInput
-            style={styles.input}
+            className="w-full p-4 border border-gray-200 rounded-xl mb-4 bg-white"
             placeholder="Nom"
             autoCapitalize="words"
             value={name}
             onChangeText={setName}
           />
           <TextInput
-            style={styles.input}
+            className="w-full p-4 border border-gray-200 rounded-xl mb-4 bg-white"
             placeholder="Email"
             keyboardType="email-address"
             autoCapitalize="none"
@@ -60,7 +60,7 @@ const RegisterScreen = () => {
             onChangeText={setEmail}
           />
           <TextInput
-            style={styles.input}
+            className="w-full p-4 border border-gray-200 rounded-xl mb-4 bg-white"
             placeholder="Mot de passe"
             secureTextEntry
             value={password}
@@ -68,33 +68,33 @@ const RegisterScreen = () => {
           />
 
           <TouchableOpacity
-            style={styles.registerButton}
+            className={`w-full p-4 rounded-xl mb-4 items-center ${loading ? 'bg-orange-300' : 'bg-orange-500'}`}
             onPress={() => handleRegister(false)}
             disabled={loading}
           >
-            <Text style={styles.registerButtonText}>
-              {loading ? 'Inscription en cours...' : 'S’inscrire'}
+            <Text className="text-white font-bold">
+              {loading ? 'Inscription en cours...' : 'S`inscrire'}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.toggleButton}
+            className="w-full p-4 rounded-xl mb-4 items-center bg-gray-100"
             onPress={() => setIsCompany(true)}
           >
-            <Text style={styles.toggleButtonText}>Vous êtes une entreprise ?</Text>
+            <Text className="text-gray-700 font-medium">Vous êtes une entreprise ?</Text>
           </TouchableOpacity>
         </View>
       ) : (
-        <View style={styles.formContainer}>
+        <View className="w-full">
           <TextInput
-            style={styles.input}
+            className="w-full p-4 border border-gray-200 rounded-xl mb-4 bg-white"
             placeholder="Nom de l'entreprise"
             autoCapitalize="words"
             value={name}
             onChangeText={setName}
           />
           <TextInput
-            style={styles.input}
+            className="w-full p-4 border border-gray-200 rounded-xl mb-4 bg-white"
             placeholder="Email"
             keyboardType="email-address"
             autoCapitalize="none"
@@ -102,99 +102,43 @@ const RegisterScreen = () => {
             onChangeText={setEmail}
           />
           <TextInput
-            style={styles.input}
+            className="w-full p-4 border border-gray-200 rounded-xl mb-4 bg-white"
             placeholder="Mot de passe"
             secureTextEntry
             value={password}
             onChangeText={setPassword}
           />
           <TextInput
-            style={styles.input}
+            className="w-full p-4 border border-gray-200 rounded-xl mb-4 bg-white"
             placeholder="ICE de l'entreprise"
             value={ice}
             onChangeText={setIce}
           />
 
           <TouchableOpacity
-            style={styles.registerButton}
+            className={`w-full p-4 rounded-xl mb-4 items-center ${loading ? 'bg-orange-300' : 'bg-orange-500'}`}
             onPress={() => handleRegister(true)}
             disabled={loading}
           >
-            <Text style={styles.registerButtonText}>
-              {loading ? 'Inscription en cours...' : 'S’inscrire'}
+            <Text className="text-white font-bold">
+              {loading ? 'Inscription en cours...' : 'S`inscrire'}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.toggleButton}
+            className="w-full p-4 rounded-xl mb-4 items-center bg-gray-100"
             onPress={() => setIsCompany(false)}
           >
-            <Text style={styles.toggleButtonText}>Vous êtes un particulier ?</Text>
+            <Text className="text-gray-700 font-medium">Vous êtes un particulier ?</Text>
           </TouchableOpacity>
         </View>
       )}
 
       <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
-        <Text style={styles.loginLink}>Déjà un compte ? Se connecter</Text>
+        <Text className="mt-4 text-orange-500 font-medium">Déjà un compte ? Se connecter</Text>
       </TouchableOpacity>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f7f7f7',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
-  },
-  formContainer: {
-    width: '100%',
-  },
-  input: {
-    width: '100%',
-    padding: 15,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    marginBottom: 15,
-    backgroundColor: '#fff',
-  },
-  toggleButton: {
-    width: '100%',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 15,
-    alignItems: 'center',
-    backgroundColor: '#6c757d',
-  },
-  toggleButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  registerButton: {
-    width: '100%',
-    padding: 15,
-    borderRadius: 10,
-    backgroundColor: '#28a745',
-    alignItems: 'center',
-  },
-  registerButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  loginLink: {
-    marginTop: 15,
-    color: '#007bff',
-    textDecorationLine: 'underline',
-  },
-});
 
 export default RegisterScreen;
