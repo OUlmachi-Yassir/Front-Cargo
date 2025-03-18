@@ -12,6 +12,11 @@ web-build/
 # expo router
 expo-env.d.ts
 
+# dotenv environment variable files
+.env
+
+
+updateIP.js
 
 
 ios
@@ -25,6 +30,3 @@ android
 
 
 
-.env
-
-.updateIP

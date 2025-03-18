@@ -4,6 +4,27 @@ import * as FileSystem from 'expo-file-system';
 
 const API_URL = process.env.EXPO_PUBLIC_APP_API_URL;
 
+export const getAllUsers = async ()=>{
+  try{
+    const token = await authService.getToken();
+    if (!token) throw new Error('No token found');
+
+    const response = await fetch(`${API_URL}/users`,{
+      method:'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+   if (!response.ok) throw new Error('Failed to fetch users');
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching users', error);
+    return null;
+  }
+}
+
 export const getUserProfile = async () => {
   try {
     const token = await authService.getToken();
