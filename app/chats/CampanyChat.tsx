@@ -4,10 +4,11 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView } from "react-nativ
 import io from "socket.io-client"
 import type { RouteProp } from "@react-navigation/native"
 import type RootStackParamList from "~/types/types"
-import { useLocalSearchParams } from "expo-router"
+import { useLocalSearchParams, useRouter } from "expo-router"
 import { authService } from "~/services/auth/authService"
 import { jwtDecode } from "jwt-decode"
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import tw  from 'twrnc';
 
 const socket = io(`${process.env.EXPO_PUBLIC_APP_API_URL}`)
 
@@ -22,6 +23,9 @@ const ChatScreen: React.FC<Props> = () => {
   const [messages, setMessages] = useState<{ sender: string; receiverId: string; text: string }[]>([])
   const [newMessage, setNewMessage] = useState("")
   const [loggedUserId, setLoggedUserId] = useState<string | null>(null)
+
+  const router = useRouter()
+  
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -118,6 +122,12 @@ const ChatScreen: React.FC<Props> = () => {
 
   return (
     <View className="flex-1 p-4 bg-white">
+       <TouchableOpacity
+          style={tw`absolute top-12 left-4 z-10 bg-black/20 p-2 rounded-full`}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
       <ScrollView className="flex-1 mb-4" contentContainerStyle={{ paddingVertical: 8 }}>
         {messages.map((msg, index) => (
           <View

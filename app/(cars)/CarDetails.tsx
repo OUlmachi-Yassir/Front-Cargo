@@ -11,7 +11,7 @@ import {
   Alert,
   Dimensions,
 } from "react-native"
-import { useLocalSearchParams } from "expo-router"
+import { useLocalSearchParams, useRouter } from "expo-router"
 import { fetchCarDetails } from "~/services/cars/carService"
 import type { Car } from "~/types/types"
 import { replaceIp } from "../../services/helpers/helpers"
@@ -46,6 +46,7 @@ const CarDetails = () => {
   const [reservations, setReservations] = useState<any[]>([])
 
   const { id } = useLocalSearchParams<{ id: string }>()
+  const router = useRouter()
 
   const {
     startDate,
@@ -218,6 +219,12 @@ const CarDetails = () => {
     <SafeAreaView className="flex-1 bg-slate-50">
       <ScrollView className="flex-1">
         <View className="relative">
+        <TouchableOpacity
+          className= 'absolute top-12 left-4 z-10 bg-black/20 p-2 rounded-full'
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
           <View className="relative h-80 bg-slate-200">
             <ScrollView
               horizontal

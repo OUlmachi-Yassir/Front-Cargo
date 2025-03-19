@@ -15,6 +15,7 @@ interface Company {
   _id: string
   name: string
   image: string
+  email:string
 }
 
 const ClientHome = () => {
@@ -59,7 +60,7 @@ const ClientHome = () => {
     const fetchCompanies = async () => {
       try {
         const users = await getAllUsers()
-        const filteredCompanies = users.filter((user) => user.role === "company")
+        const filteredCompanies = users.filter((user:any) => user.role === "company")
         setCompanies(filteredCompanies)
       } catch (err) {
         setError("Impossible de récupérer les utilisateurs.")
@@ -160,8 +161,8 @@ const ClientHome = () => {
             <TouchableOpacity
               key={company._id}
               style={tw`mr-4 bg-white rounded-xl shadow-md overflow-hidden w-40 border border-orange-200`}
-              onPress={() => startChat(company._id)}
-            >
+              onPress={() => router.push({ pathname: "/detaills/CampanyDetails", params: { id: company._id, name: company.name, email: company.email,image: replaceIp(company.image, process.env.EXPO_PUBLIC_URL) } })}
+              >
               <Image
                 source={
                   company.image
@@ -188,7 +189,6 @@ const ClientHome = () => {
             onChangeText={setSearchQuery}
           />
           
-          {/* Filter buttons */}
           <View style={tw`flex-row flex-wrap justify-between mb-2`}>
             <TouchableOpacity 
               style={tw`bg-white border-2 ${selectedBrand ? 'border-orange-500' : 'border-orange-300'} rounded-lg py-2 px-4 mb-2 w-[48%]`}
@@ -219,7 +219,6 @@ const ClientHome = () => {
             </TouchableOpacity>
           </View>
           
-          {/* Expanded filter options */}
           {expandedFilter === 'brands' && (
             <View style={tw`bg-white border border-orange-200 rounded-lg p-2 mb-4 shadow-sm`}>
               <ScrollView style={tw`max-h-40`}>
