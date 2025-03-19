@@ -18,7 +18,7 @@ export default function Index() {
         resizeMode="cover"
       >
         <LinearGradient
-          colors={['rgba(0,0,0,0.3)', 'rgba(0,0,0,0.7)']}
+          colors={['rgba(0,0,0,0.3)', 'rgba(32, 32, 32, 0.7)']}
           style={tw`flex-1 justify-between p-6`}
         >
           <View style={tw`items-center mt-10`}>
