@@ -81,7 +81,7 @@ const CarDetails = () => {
       if (!userId || !id) return
 
       try {
-        const data = await fetchUserReservations(userId, id)
+        const data = await fetchUserReservations()
         console.log("Réservations chargées:", data)
 
         if (Array.isArray(data)) {
@@ -162,7 +162,7 @@ const CarDetails = () => {
     let statusColor = ""
     let statusBg = ""
     let statusText = ""
-    let statusIcon = ""
+    let statusIcon: keyof typeof Ionicons.glyphMap = "time-outline"; // Default icon
 
     switch (displayStatus) {
       case "pending":
@@ -323,7 +323,7 @@ const CarDetails = () => {
 
                   let bgColor = "bg-amber-50"
                   let textColor = "text-amber-600"
-                  let iconName = "time-outline"
+                  let iconName: keyof typeof Ionicons.glyphMap = "time-outline"; 
                   let iconColor = "#D97706"
                   let statusText = "En attente"
 

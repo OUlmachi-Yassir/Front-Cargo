@@ -7,6 +7,8 @@ export const useReservation = () => {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [loading, setLoading] = useState(false);
+  const [reservationStatus, setReservationStatus] = useState<string | null>(null);
+
 
   const handleReservation = async (carId: string) => {
     if (!startDate || !endDate) {
@@ -54,6 +56,8 @@ export const useReservation = () => {
     setEndDate,
     loading,
     handleReservation,
+    reservationStatus,
+
   };
 };
 
@@ -77,7 +81,7 @@ export const fetchUserReservations = async () => {
     if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}, ${responseBody.message || "Aucune réponse détaillée"}`);
 
     return responseBody;
-  } catch (error) {
+  } catch (error:any) {
     console.error("Erreur lors de la récupération des réservations :", error);
     Alert.alert("Erreur", error.message || "Une erreur inconnue est survenue");
     return [];  
