@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import { View, Text, Image, TouchableOpacity, FlatList, ActivityIndicator, SafeAreaView, StatusBar } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
@@ -18,10 +16,11 @@ const CompanyDetails = () => {
   const [error, setError] = useState("")
 
   const router = useRouter()
-  const { id, name, image } = useLocalSearchParams<{
+  const { id, name, image, email } = useLocalSearchParams<{
     id: string
     name: string
     image: string
+    email:string
   }>()
 
   const startChat = async () => {
@@ -58,6 +57,8 @@ const CompanyDetails = () => {
 
     fetchCars()
   }, [id])
+
+  
 
   if (loading) {
     return (
@@ -110,6 +111,10 @@ const CompanyDetails = () => {
         <Text style={tw`text-gray-700 mb-5 leading-5`}>
           Détails supplémentaires sur l'entreprise peuvent être ajoutés ici.
         </Text>
+        <View style={tw`flex-row items-center mb-5`}>
+        <Ionicons name="mail-outline" size={24} color="#F97316" />            
+        <Text style={tw`text-gray-700 ml-5 leading-5`}>{email}</Text>
+          </View>
 
         <TouchableOpacity style={tw`bg-orange-500 py-3.5 rounded-xl items-center mb-6 shadow-sm`} onPress={startChat}>
           <View style={tw`flex-row items-center`}>

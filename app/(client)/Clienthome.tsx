@@ -15,6 +15,7 @@ interface Company {
   _id: string
   name: string
   image: string
+  email:string
 }
 
 const ClientHome = () => {
@@ -59,7 +60,7 @@ const ClientHome = () => {
     const fetchCompanies = async () => {
       try {
         const users = await getAllUsers()
-        const filteredCompanies = users.filter((user) => user.role === "company")
+        const filteredCompanies = users.filter((user:any) => user.role === "company")
         setCompanies(filteredCompanies)
       } catch (err) {
         setError("Impossible de récupérer les utilisateurs.")
@@ -160,7 +161,7 @@ const ClientHome = () => {
             <TouchableOpacity
               key={company._id}
               style={tw`mr-4 bg-white rounded-xl shadow-md overflow-hidden w-40 border border-orange-200`}
-              onPress={() => router.push({ pathname: "/detaills/CampanyDetails", params: { id: company._id, name: company.name, image: replaceIp(company.image, process.env.EXPO_PUBLIC_URL) } })}
+              onPress={() => router.push({ pathname: "/detaills/CampanyDetails", params: { id: company._id, name: company.name, email: company.email,image: replaceIp(company.image, process.env.EXPO_PUBLIC_URL) } })}
               >
               <Image
                 source={

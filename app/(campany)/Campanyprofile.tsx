@@ -29,7 +29,7 @@ const ComponyProfile = () => {
   const [updatedUser, setUpdatedUser] = useState<any>({});
   const [location, setLocation] = useState<{ latitude: number; longitude: number; city?: string | null; country?: string | null } | null>(null);
   const [sidebarVisible, setSidebarVisible] = useState(false);
-  const sidebarAnimation = useRef(new Animated.Value(-300)).current; // Initial position off-screen
+  const sidebarAnimation = useRef(new Animated.Value(-300)).current; 
   const router = useRouter();
 
   useEffect(() => {
