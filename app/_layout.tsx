@@ -53,7 +53,7 @@ export default function RootLayout() {
         <Stack.Screen name="(cars)" options={{ headerShown: false }} />
         <Stack.Screen name="(campany)" options={{ headerShown: false }} />
         <Stack.Screen name="Chat/CampanyChat" options={{ headerShown: false }} />
-
+        <Stack.Screen name="detaills/CampanyDetails.tsx" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

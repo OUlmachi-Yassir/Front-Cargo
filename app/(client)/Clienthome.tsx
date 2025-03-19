@@ -160,7 +160,7 @@ const ClientHome = () => {
             <TouchableOpacity
               key={company._id}
               style={tw`mr-4 bg-white rounded-xl shadow-md overflow-hidden w-40 border border-orange-200`}
-              onPress={() => router.push({ pathname: "/(client)/CampanyDetails", params: { id: company._id, name: company.name, image: replaceIp(company.image, process.env.EXPO_PUBLIC_URL) } })}
+              onPress={() => router.push({ pathname: "/detaills/CampanyDetails", params: { id: company._id, name: company.name, image: replaceIp(company.image, process.env.EXPO_PUBLIC_URL) } })}
               >
               <Image
                 source={
@@ -188,7 +188,6 @@ const ClientHome = () => {
             onChangeText={setSearchQuery}
           />
           
-          {/* Filter buttons */}
           <View style={tw`flex-row flex-wrap justify-between mb-2`}>
             <TouchableOpacity 
               style={tw`bg-white border-2 ${selectedBrand ? 'border-orange-500' : 'border-orange-300'} rounded-lg py-2 px-4 mb-2 w-[48%]`}
@@ -219,7 +218,6 @@ const ClientHome = () => {
             </TouchableOpacity>
           </View>
           
-          {/* Expanded filter options */}
           {expandedFilter === 'brands' && (
             <View style={tw`bg-white border border-orange-200 rounded-lg p-2 mb-4 shadow-sm`}>
               <ScrollView style={tw`max-h-40`}>
