@@ -160,8 +160,8 @@ const ClientHome = () => {
             <TouchableOpacity
               key={company._id}
               style={tw`mr-4 bg-white rounded-xl shadow-md overflow-hidden w-40 border border-orange-200`}
-              onPress={() => startChat(company._id)}
-            >
+              onPress={() => router.push({ pathname: "/(client)/CampanyDetails", params: { id: company._id, name: company.name, image: replaceIp(company.image, process.env.EXPO_PUBLIC_URL) } })}
+              >
               <Image
                 source={
                   company.image
