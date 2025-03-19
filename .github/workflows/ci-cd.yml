@@ -1,4 +1,4 @@
-name: Node.js CI/CD Pipeline
+name: Cargo CI/CD Pipeline
 
 on:
   push:
@@ -24,6 +24,12 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+
+      - name: Run TypeScript type checking
+        run: npm run typescript:check
+
+      - name: Run ESLint
+        run: npm run lint
 
     # - name: Run tests
     #   run: npm test

@@ -1,13 +1,30 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, ScrollView, SafeAreaView } from "react-native"
 import { authService } from "~/services/auth/authService"
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import tw from "twrnc"
 
+
+
+type Car = {
+  _id: string;
+  marque: string;
+  modele: string;
+  reservations?: Reservation[];
+};
+
+type Reservation = {
+  _id: string;
+  userId: string;
+  startDate: string;
+  endDate: string;
+  statut: "en attente" | "approuvé" | "rejeté";
+};
+
+
+
 const HomeScreen = () => {
-  const [cars, setCars] = useState([])
+  const [cars, setCars] = useState<Car[]>([]);
   const [statistics, setStatistics] = useState({
     totalCars: 0,
     totalReservations: 0,
@@ -16,7 +33,7 @@ const HomeScreen = () => {
     rejectedReservations: 0,
   })
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null);
 
   const fetchStatistics = async () => {
     const token = await authService.getToken()
@@ -46,7 +63,7 @@ const HomeScreen = () => {
       )
     } catch (error) {
       console.error("Error fetching statistics:", error)
-      setError(error.message)
+      setError(error instanceof Error ? error.message : "An unknown error occurred");
     }
   }
 
@@ -74,7 +91,7 @@ const HomeScreen = () => {
     }
   }
 
-  const handleApproveReservation = async (carId, reservationId) => {
+  const handleApproveReservation = async (carId: string, reservationId: string) => {
     const token = await authService.getToken()
     try {
       const response = await fetch(
@@ -99,7 +116,7 @@ const HomeScreen = () => {
     }
   }
 
-  const handleRejectReservation = async (carId, reservationId) => {
+  const handleRejectReservation = async (carId: string, reservationId: string) => {
     const token = await authService.getToken()
     try {
       const response = await fetch(
@@ -146,7 +163,7 @@ const HomeScreen = () => {
     )
   }
 
-  const renderCarItem = ({ item }) => (
+  const renderCarItem = ({ item }: { item: Car }) => (
     <View style={tw`mb-6 bg-white rounded-xl shadow-md overflow-hidden`}>
       <View style={tw`bg-orange-500 px-4 py-3`}>
         <Text style={tw`text-white font-bold text-lg`}>

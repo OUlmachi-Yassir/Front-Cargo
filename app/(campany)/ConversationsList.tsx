@@ -7,10 +7,32 @@ import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
 import { replaceIp } from '~/services/helpers/helpers';
 
+type User = {
+  _id: string;
+  name: string;
+  images?: string[];
+};
+
+type Message = {
+  text: string;
+};
+
+type Conversation = {
+  _id: string;
+  senderId: string;
+  receiverId: string;
+  messages?: Message[];
+  otherUser?: User;
+};
+
+type DecodedToken = {
+  id: string;
+};
+
 export default function ConversationsList() {
-  const [conversations, setConversations] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [mappedConversations, setMappedConversations] = useState([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [mappedConversations, setMappedConversations] = useState<Conversation[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const router = useRouter();
 
@@ -18,29 +40,24 @@ export default function ConversationsList() {
     setIsRefreshing(true);
     try {
       const userConversations = await getUserConversations();
-      console.log(userConversations);
       const allUsers = await getAllUsers();
       const token = await authService.getToken();
-      
+
       if (!token) {
         console.error('No token found');
         return;
       }
 
-      const decodedToken = jwtDecode(token);
+      const decodedToken = jwtDecode(token) as DecodedToken;
       const loggedUserId = decodedToken.id;
-
-      console.log("Logged User ID:", loggedUserId);
-      console.log("All Users:", allUsers);
 
       if (userConversations?.conversations && allUsers) {
         setConversations(userConversations.conversations);
         setUsers(allUsers);
 
-        const mappedData = userConversations.conversations.map((conv) => {
+        const mappedData = userConversations.conversations.map((conv: Conversation) => {
           const otherUserId = conv.senderId === loggedUserId ? conv.receiverId : conv.senderId;
-          const otherUser = allUsers.find((user) => user._id === otherUserId);
-      
+          const otherUser = allUsers.find((user: User) => user._id === otherUserId);
 
           return { ...conv, otherUser };
         });
@@ -58,7 +75,7 @@ export default function ConversationsList() {
     fetchData();
   }, []);
 
-  const startChat = (receiverId) => {
+  const startChat = (receiverId: string) => {
     try {
       router.push({ pathname: '/chats/CampanyChat', params: { id: receiverId } });
     } catch (error) {
@@ -85,7 +102,6 @@ export default function ConversationsList() {
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => {
           if (!item.otherUser) return null;
-          console.log("im here: ",item.messages?.[item.messages.length - 1]);
 
           const lastMessage = item.messages?.[item.messages.length - 1]?.text || "No messages yet";
 
@@ -101,14 +117,14 @@ export default function ConversationsList() {
                 borderRadius: 8,
                 backgroundColor: '#fff',
               }}
-              onPress={() => startChat(item.otherUser._id)}
+              onPress={() => startChat(item.otherUser!._id)}
               className="shadow-md mb-4"
             >
               <Image
-                source={{ uri: replaceIp(item.otherUser.images?.[0] , process.env.EXPO_PUBLIC_URL) }}
-                style={{ width: 50, height: 50, borderRadius: 25, marginRight: 16 }}
-                className="object-cover"
-              />
+                  source={{ uri: item.otherUser.images?.[0] ? replaceIp(item.otherUser.images[0], process.env.EXPO_PUBLIC_URL) : 'https://placeholder.com/50' }}
+                  style={{ width: 50, height: 50, borderRadius: 25, marginRight: 16 }}
+                  className="object-cover"
+                />
               <View className="flex-1">
                 <Text className="text-xl font-medium text-gray-800">{item.otherUser.name}</Text>
                 <Text className="text-sm text-gray-500">{lastMessage}</Text>
