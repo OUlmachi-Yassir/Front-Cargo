@@ -1,4 +1,4 @@
-import { useNavigation, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { authService } from '~/services/auth/authService';
@@ -6,7 +6,6 @@ import ErrorService from '~/services/error/ErrorService';
 import { RegisterData } from '~/types/types';
 
 const RegisterScreen = () => {
-  const navigation = useNavigation();
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

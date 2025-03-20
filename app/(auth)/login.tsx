@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, SafeAreaView } from 'react-native';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import RootStackParamList from '../../types/types';
 import { authService } from '~/services/auth/authService';
 import ErrorService from '~/services/error/ErrorService';
 import { useRouter } from 'expo-router';
@@ -10,7 +8,6 @@ import tw from 'twrnc';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function Login() {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const rooter = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
