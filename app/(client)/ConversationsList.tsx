@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import { View, Text, TouchableOpacity, Image, FlatList, ActivityIndicator } from "react-native"
 import { getUserConversations } from "~/services/conversation/conversation"

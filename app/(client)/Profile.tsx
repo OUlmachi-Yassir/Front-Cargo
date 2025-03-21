@@ -300,40 +300,67 @@ const ComponyProfile = () => {
               />
             </TouchableOpacity>
             <Text style={tw`text-2xl font-bold text-center bg-white pt-10 mb-10 rounded-full `}>
-              Hi WHATS NEW <Text style={tw`text-2xl uppercase text-red-500`}>{user.name}</Text>
+              Hi WHATS NEW <Text style={tw`text-2xl uppercase text-orange-500`}>{user.name}</Text>
             </Text>
 
             {editing ? (
-              <>
-                <TextInput
-                  style={tw`border p-2 rounded-md mb-2`}
-                  placeholder="Name"
-                  value={updatedUser.name}
-                  onChangeText={(text) => setUpdatedUser({ ...updatedUser, name: text })}
-                />
-                <TextInput
-                  style={tw`border p-2 rounded-md mb-2`}
-                  placeholder="Email"
-                  value={updatedUser.email}
-                  editable={false}
-                />
-                {user.role === 'company' && (
+                <View style={tw`px-4`}>
+                  <Text style={tw`text-sm font-medium text-orange-500 mb-1 ml-1`}>Name</Text>
                   <TextInput
-                    style={tw`border p-2 rounded-md mb-2`}
-                    placeholder="ICE"
-                    value={updatedUser.ice || ''}
-                    onChangeText={(text) => setUpdatedUser({ ...updatedUser, ice: text })}
+                    style={tw`border-2 border-orange-300 p-3 rounded-xl mb-4 bg-white`}
+                    placeholder="Name"
+                    value={updatedUser.name}
+                    onChangeText={(text) => setUpdatedUser({ ...updatedUser, name: text })}
                   />
-                )}
-                {location && (
-                  <Text style={tw`border p-2 rounded-md mb-2`}>
-                    Location: {location.city}, {location.country} (Lat: {location.latitude}, Long: {location.longitude})
-                  </Text>
-                )}
-                <Button title="Save Changes" onPress={handleUpdate} />
-                <Button title="Cancel" onPress={() => setEditing(false)} color="gray" />
-              </>
-            ) : (
+
+                  <Text style={tw`text-sm font-medium text-orange-500 mb-1 ml-1`}>Email</Text>
+                  <TextInput
+                    style={tw`border-2 border-orange-300 p-3 rounded-xl mb-4 bg-gray-100`}
+                    placeholder="Email"
+                    value={updatedUser.email}
+                    editable={false}
+                  />
+
+                  {user.role === "company" && (
+                    <>
+                      <Text style={tw`text-sm font-medium text-orange-500 mb-1 ml-1`}>ICE</Text>
+                      <TextInput
+                        style={tw`border-2 border-orange-300 p-3 rounded-xl mb-4 bg-white`}
+                        placeholder="ICE"
+                        value={updatedUser.ice || ""}
+                        onChangeText={(text) => setUpdatedUser({ ...updatedUser, ice: text })}
+                      />
+                    </>
+                  )}
+
+                  {location && (
+                    <View style={tw`border-2 border-orange-300 p-3 rounded-xl mb-6 bg-white`}>
+                      <Text style={tw`text-gray-700`}>
+                        Location: {location.city}, {location.country}
+                      </Text>
+                      <Text style={tw`text-gray-500 text-xs mt-1`}>
+                        Lat: {location.latitude.toFixed(4)}, Long: {location.longitude.toFixed(4)}
+                      </Text>
+                    </View>
+                  )}
+
+                  <View style={tw`flex-row justify-between mb-6`}>
+                    <TouchableOpacity
+                      style={tw`bg-orange-500 py-3 px-6 rounded-xl shadow-md flex-1 mr-2`}
+                      onPress={handleUpdate}
+                    >
+                      <Text style={tw`text-white font-bold text-center`}>Save Changes</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={tw`bg-white border-2 border-orange-300 py-3 px-6 rounded-xl flex-1 ml-2`}
+                      onPress={() => setEditing(false)}
+                    >
+                      <Text style={tw`text-orange-500 font-bold text-center`}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ) : (
               <>
               <View className='flex flex-col px-5 '>
               <View style={tw``}>
