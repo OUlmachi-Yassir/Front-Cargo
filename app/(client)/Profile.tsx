@@ -10,7 +10,7 @@ import {
   Animated,
   ScrollView,
 } from 'react-native';
-import { getUserProfile, updateUserProfile, updateUserImage, deleteUserProfile, updateUserImage2 } from '~/services/user/profileService';
+import { getUserProfile, updateUserProfile, deleteUserProfile, updateUserImage2 } from '~/services/user/profileService';
 import { authService } from '~/services/auth/authService';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
@@ -19,7 +19,6 @@ import * as ImagePicker from 'expo-image-picker';
 import tw from 'twrnc';
 import Svg, { Path } from 'react-native-svg';
 import MapComponent from '~/components/map/MapComponent';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Text } from 'react-native';
 
 const ComponyProfile = () => {
@@ -29,7 +28,7 @@ const ComponyProfile = () => {
   const [updatedUser, setUpdatedUser] = useState<any>({});
   const [location, setLocation] = useState<{ latitude: number; longitude: number; city?: string | null; country?: string | null } | null>(null);
   const [sidebarVisible, setSidebarVisible] = useState(false);
-  const sidebarAnimation = useRef(new Animated.Value(-300)).current; // Initial position off-screen
+  const sidebarAnimation = useRef(new Animated.Value(-300)).current;
   const router = useRouter();
 
   useEffect(() => {
@@ -166,7 +165,7 @@ const ComponyProfile = () => {
 
   return (
     <View style={tw`flex-1 relative bg-white` }>
-      <TouchableOpacity onPress={toggleSidebar} style={tw`absolute top-10 left-83 z-50`}>
+      <TouchableOpacity onPress={toggleSidebar} style={tw`absolute top-10 left-83 z-50 w-20 bg-orange-100 py-2 px-4 rounded-l-full`}>
         <View style={[
             tw`w-1 h-0.5 border-4 rounded-full shadow-2xl bg-black mb-1`,
             {
