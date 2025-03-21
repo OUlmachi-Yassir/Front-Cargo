@@ -99,7 +99,7 @@ export default function ConversationsList() {
   }
 
   return (
-    <View className="flex-1 bg-white p-4">
+    <View className="flex-1 bg-white p-4 pt-10">
       <View className="flex-row justify-between items-center mb-6">
         <Text className="text-3xl font-bold text-gray-800">Conversations</Text>
         <TouchableOpacity
