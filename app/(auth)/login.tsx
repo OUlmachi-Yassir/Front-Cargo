@@ -100,10 +100,6 @@ export default function Login() {
             </View>
           </View>
           
-          <TouchableOpacity style={tw`self-end mb-6`}>
-            <Text style={tw`text-orange-600 font-medium`}>Mot de passe oublié ?</Text>
-          </TouchableOpacity>
-          
           <TouchableOpacity 
             style={tw`bg-orange-500 py-4 rounded-xl shadow-md ${loading ? 'opacity-70' : ''}`}
             onPress={handleLogin} 
@@ -128,13 +124,10 @@ export default function Login() {
           <Text style={tw`text-gray-500 text-center mb-4`}>Ou connectez-vous avec</Text>
           <View style={tw`flex-row justify-center space-x-4`}>
             <TouchableOpacity style={tw`w-14 h-14 rounded-full bg-gray-100 items-center justify-center border border-gray-200`}>
-              <Ionicons name="logo-google" size={24} color="#DB4437" />
             </TouchableOpacity>
             <TouchableOpacity style={tw`w-14 h-14 rounded-full bg-gray-100 items-center justify-center border border-gray-200`}>
-              <Ionicons name="logo-facebook" size={24} color="#4267B2" />
             </TouchableOpacity>
             <TouchableOpacity style={tw`w-14 h-14 rounded-full bg-gray-100 items-center justify-center border border-gray-200`}>
-              <Ionicons name="logo-apple" size={24} color="#000000" />
             </TouchableOpacity>
           </View>
         </View>
